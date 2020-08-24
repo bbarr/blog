@@ -1,7 +1,78 @@
-<br>
-Posts:
-{% for post in posts %}
-<p>
-  {{ post.title }}
-</p>
-{% endfor %}
+
+{% layout "layout.liquid" %}
+
+{% block content %}
+
+<div class="flex" x-data="state()" x-init="() => { firstPost && selectPost(firstPost.id) }">
+
+  <sidebar class="h-screen w-56 bg-gray-100 py-6">
+    <div class="px-6">
+      <h1>{{ site.name }}</h1>
+      <h2 class="uppercase text-gray-800 text-sm">Prosaic</h2>
+      <p class="uppercase text-gray-600 mt-10 mb-2">Category</p>
+    </div>
+    <nav>
+      <a class="side-menu-link active" href="#">{% include '_icon.liquid', name: 'page' %}Posts</a>
+      <a class="side-menu-link" href="#">{% include '_icon.liquid', name: 'cog' %}Settings</a>
+    </nav>
+  </sidebar>
+
+  <div class="w-96 border-l border-r border-gray-300">
+    <div class="flex items-center bg-gray-100 h-16 px-4 border-b border-gray-200">
+      <div class="h-10 border border-gray-200 flex-1 mr-2 rounded flex items-center bg-white">
+        <div class="w-6 h-6 ml-2 mr-1">{% include '_icon.liquid', name: 'search' %}</div>
+        <input class="flex-1 outline-none" type="text">
+      </div>
+      <button class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
+    </div>
+    <div>
+      <div class="pt-3 px-4 border-b border-gray-200">
+        <button class="filter active-filter">Drafts</a>
+        <button class="filter">Published</a>
+      </div>
+      {% for post in posts %}
+        <div class="post" x-bind:class="{ 'active': selectedId === {{ post.id }} }" x-on:click="selectPost({{ post.id }})">
+          {{ post.title }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="flex-1">
+    <div class="flex-base h-16 border-b border-gray-200 px-6">
+      <div class="flex-1"></div>
+      <div>
+        <button x-on:click="edit()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'edit' %}</span></button>
+        <button class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
+      </div>
+    </div>
+    <div class="my-5 mx-10">
+      <div x-html="preview"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script>
+  function state() {
+
+    const api = {
+      firstPost: {{ posts | first | json }},
+      preview: '',
+      selectedId: null,
+      edit() {
+        window.location.href = `/editor/${api.selectedId}`
+      },
+      async selectPost(id) {
+        this.selectedId = id
+        const content = await fetch(`/api/posts/${id}/content`).then(resp => resp.json()).then(json => json.data)
+        this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: {} } }, content)
+      }
+    }
+
+    return api
+  }
+</script>
+
+{% endblock %}

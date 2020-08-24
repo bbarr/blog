@@ -1,2 +1,124 @@
-signup
-<a href="/login">Login</a>
+
+{% layout "layout.liquid" %}
+
+{% block content %}
+
+<div x-data="state()" class="modal-container">
+  <template x-if="screen === 'create-user'">
+    <div class="modal">
+      <div class="modal-header text-center">
+        <h2 class="text-4xl mb-2">Sign up</h2>
+        <p class="text-gray-600">Already have an account? <a href="/login">Log in</a></p>
+      </div>
+      <form class="modal-body" x-on:submit.prevent="submitAccount()">
+        <div class="field">
+          <label>Full name</label>
+          <input x-bind:disabled="isLoading" type="text" x-model="name"> 
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input x-bind:disabled="isLoading" type="email" x-model="email"> 
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input x-bind:disabled="isLoading" type="password" x-model="password"> 
+        </div>
+        <button 
+          class="button mt-3" 
+          x-bind:disabled="isLoading"
+          x-text="isLoading ? 'Creating...' : 'Create account'">
+        </button>
+        <p class="text-center text-gray-600 text-xs mt-6">
+        By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </p>
+      </form>
+    </div>
+  </template>
+  <template x-if="screen === 'create-site'">
+    <div class="modal">
+      <div class="modal-header text-center">
+        <h2 class="text-4xl mb-2">Create your blog</h2>
+        <p class="text-gray-600">Only <span class="bg-orange-200">$5 per month</span> and you can cancel at any point</p>
+      </div>
+      <form class="modal-body" x-on:submit.prevent="submitSite()">
+        <div class="field">
+          <label>Blog name</label>
+          <input x-bind:disabled="isLoading" type="text" x-model="siteName"> 
+        </div>
+        <div class="field">
+          <label>Subdomain</label>
+          <div class="flex">
+            <input x-bind:disabled="isLoading" type="text" x-model="handle" class="border-r-0 rounded-r-none"> 
+            <div class="flex items-center justify-center mb-4 px-4 border-2 border-gray-200 text-gray-600 rounded-r">.prosaic.io</div>
+          </div>
+        </div>
+        <!--
+        <div class="field mb-3">
+          <label>Payment information</label>
+          <input type="text" x-model=""> 
+        </div>
+        -->
+        <button class="button mt-3"
+          x-bind:disabled="isLoading"
+          x-text="isLoading ? 'Initializing...' : 'Start blogging'"></button>
+        <p class="text-center text-gray-600 text-xs mt-6">
+        By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </p>
+      </form>
+    </div>
+  </template>
+</div>
+
+  <script>
+
+    function state() {
+      return {
+        screen: {% if isUser %}'create-site'{% else %}'create-user'{% endif %},
+        email: '',
+        password: '',
+        name: '',
+        siteName: '',
+        handle: '',
+        isLoading: false,
+        submitSite() {
+          this.isLoading = true
+          setTimeout(() => {
+            return fetch('/api/create-site', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ name: this.siteName, handle: this.handle })
+            })
+            .then(resp => resp.json())
+            .then(({ data: site, error }) => {
+              if (!error) {
+                window.location.href = '/dashboard'
+              }
+            })
+          }, 1000)
+        },
+        submitAccount() {
+          this.isLoading = true
+          setTimeout(() => {
+            return fetch('/api/create-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email: this.email, name: this.name, password: this.password })
+            })
+            .then(resp => resp.json())
+            .then(({ data: account, error }) => {
+              if (!error) {
+                this.isLoading = false
+                this.screen = 'create-site'
+              }
+            })
+          }, 1000)
+        }
+      }
+    }
+
+  </script>
+{% endblock %}

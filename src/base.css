@@ -1,0 +1,110 @@
+
+@tailwind base;
+
+@tailwind components;
+
+body {
+  @apply my-text-black;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.my-text-black {
+  @apply text-gray-800;
+}
+
+.flex-base {
+  @apply flex justify-center items-center;
+}
+
+.fixed-base {
+  @apply fixed top-0 left-0 right-0 bottom-0;
+}
+
+.modal-container {
+  @apply w-screen h-screen flex items-center justify-center bg-gray-300;
+}
+
+.modal {
+  @apply w-full max-w-xl bg-white shadow rounded-lg;
+}
+
+.modal-header {
+  @apply p-8;
+}
+
+.modal-body {
+  @apply p-10 bg-gray-100 border-t border-gray-300 rounded-b-lg;
+}
+
+.field label {
+  @apply block font-semibold mb-1 text-sm text-gray-800;
+}
+
+.modal-body input {
+  @apply mb-4 w-full border-gray-200 border-2 rounded text-lg h-10 px-2;
+}
+
+.button {
+  @apply bg-gray-800 text-white text-center w-full py-3 rounded;
+}
+
+.button[disabled="disabled"] {
+  @apply bg-gray-600 text-gray-200 cursor-wait;
+}
+
+.side-menu-link {
+  @apply flex no-underline py-3 px-6;
+}
+
+.side-menu-link.active {
+  @apply bg-gray-200;
+}
+
+.side-menu-link svg {
+  @apply w-6 mr-2;
+}
+
+.post {
+  @apply px-6 py-4;
+}
+
+.post.active {
+  @apply bg-gray-100;
+}
+
+.filter {
+  @apply py-2 mr-4 font-semibold text-gray-700 outline-none;
+}
+
+.filter:focus {
+  @apply outline-none;
+}
+
+.filter.active-filter {
+  @apply border-b-2 border-gray-900 text-gray-900;
+}
+
+.w-80 {
+  width: 20rem;
+}
+
+.w-88 {
+  width: 22rem;
+}
+
+.w-96 {
+  width: 24rem;
+}
+
+.editor-toolbar {
+  border: none !important;
+}
+
+body .CodeMirror {
+  @apply m-auto max-w-2xl border-0;
+}
+
+@tailwind utilities;

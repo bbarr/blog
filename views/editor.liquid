@@ -1,0 +1,56 @@
+
+{% layout "layout.liquid" %}
+
+{% block content %}
+
+<div x-data="state()">
+  <div class="back flex-1">
+    <button x-on:click="back()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
+  </div>
+
+  <div class="actions flex-1 justify-end flex">
+    <button x-on:click="back()" class="h-10 border border-gray-200 bg-white rounded px-4">Publish</a>
+    <button x-on:click="back()" class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
+  </div>
+
+  <div id="editor">
+    <textarea>{{ post.content }}</textarea>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script>
+  const mde = new EasyMDE()
+  const toolbar = document.querySelector('.editor-toolbar')
+  const _back = document.querySelector('.back')
+  const _actions = document.querySelector('.actions')
+  const back = _back.parentNode.removeChild(_back)
+  const actions = _actions.parentNode.removeChild(_actions)
+  const container = document.createElement('div')
+  const title = document.createElement('input')
+  title.setAttribute('x-model', 'title')
+  title.setAttribute('autofocus', 'autofocus')
+  title.classList.add('max-w-2xl', 'm-auto', 'block', 'w-full', 'p-3', 'focus:outline-none', 'text-4xl')
+  const editor = document.querySelector('.CodeMirror')
+  editor.parentNode.insertBefore(title, editor)
+  container.appendChild(back)
+  container.appendChild(toolbar.cloneNode(true))
+  container.appendChild(actions)
+  toolbar.parentNode.replaceChild(container, toolbar)
+  container.classList.add('flex-base', 'px-5', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
+  
+  function state() {
+
+    const api = {
+      title: '{{ post.title }}',
+      back() {
+        window.history.back()
+      }
+    }
+
+    return api
+  }
+</script>
+
+{% endblock %}

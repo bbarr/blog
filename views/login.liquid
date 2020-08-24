@@ -26,11 +26,12 @@
         },
         body: JSON.stringify(model)
       })
-        .then(() => {
-          debugger
-          window.location.href = '/dashboard'
-        }, () => {
-          console.log('Login failed')
+        .then(resp => resp.json())
+        .then(({ data, error }) => {
+          if (error) {
+          } else {
+            window.location.href = '/dashboard'
+          }
         })
     }
   </script>
