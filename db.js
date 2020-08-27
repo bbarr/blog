@@ -28,16 +28,16 @@ const selectUserById = db.prepare('select id, email from user where id=?')
 const insertUser = db.prepare('insert into user (name, email, hashed_password) values (@name, @email, @hashed_password)')
 
 // site
-const selectSiteByHandle = db.prepare('select name, handle from site where handle=?')
+const selectSiteByHandle = db.prepare('select name, handle, theme_id from site where handle=?')
 const selectDefaultSiteByUserId = db.prepare(`
   select 
     s.handle 
   from 
     site s,
-    user_site_role r 
+    user_site_permission p 
   where 
-    r.user_id=? and
-    r.site_handle=s.handle
+    p.user_id=? and
+    p.site_handle=s.handle
   limit 1;
   `)
 const insertSite = db.prepare(`
@@ -58,10 +58,14 @@ const updateSiteBilling = db.prepare(`
 const selectPostsBySiteHandle = db.prepare('select id, content, title, created_at, updated_at, published_at from post where site_handle=?')
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
+const updatePost = db.prepare('update post set title=@title, content=@content where id=@id and user_id=@user_id')
+const insertPost = db.prepare('insert into post (title, content, user_id, site_handle) values (@title, @content, @user_id, @site_handle)')
 
-// role
-const insertRole = db.prepare('insert into user_site_role (user_id, site_handle, role) values (@user_id, @site_handle, @role)')
+// permissions
+const insertPermissions = db.prepare('insert into user_site_permission (user_id, site_handle, list) values (@user_id, @site_handle, @list)')
 
+// deploys
+const insertDeploy = db.prepare('insert into deploy (post_id) values (?)')
 
 module.exports = {
   users: {
@@ -71,13 +75,14 @@ module.exports = {
     create: db.transaction(props => {
       const info = insertUser.run(snakeKeys(props))
       return selectUserById.get(info.lastInsertRowid)
-    })     
+    })
   },
   sites: {
-    defaultByUserId: id => selectDefaultSiteByUserId.get(id),
+    defaultByUserId: id => camelKeys(selectDefaultSiteByUserId.get(id)),
+    byHandle: handle => camelKeys(selectSiteByHandle.get(handle)),
     create: db.transaction(props => {
       insertSite.run(snakeKeys(props))
-      insertRole.run(snakeKeys({ ...props, siteHandle: props.handle }))
+      insertPermissions.run(snakeKeys({ userId: props.userId, siteHandle: props.handle, list: props.permissions }))
       return selectSiteByHandle.get(props.handle)
     }),
     updateBilling(props) {
@@ -87,6 +92,11 @@ module.exports = {
   posts: {
     bySiteHandle: handle => selectPostsBySiteHandle.all(handle).map(camelKeys),
     byId: id => camelKeys(selectPostById.get(id)),
-    contentById: id => camelKeys(selectPostContentById.get(id))
+    contentById: id => camelKeys(selectPostContentById.get(id)),
+    update: props => updatePost.run(snakeKeys(props)),
+    create: props => insertPost.run(snakeKeys(props))
+  },
+  deploys: {
+    create: postId => insertDeploy(postId)
   }
 }

@@ -1,5 +1,7 @@
 
 const util = require('util')
+const cp = require('child_process')
+const fs = require('fs')
 
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -10,6 +12,7 @@ const bcrypt = require('bcrypt')
 const { Liquid } = require('liquidjs')
 
 const db = require('./db')
+const permissions = require('./permissions')
 
 const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
@@ -54,10 +57,11 @@ const safeP = p => p.then(
 server.use(async (req, res, next) => {
   try {
     const jwt = req.signedCookies.auth
-    const { userId, siteHandle } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
-    console.log('auth!', userId, siteHandle)
+    const { userId, siteHandle, sitePermissions } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
+    console.log('auth!', userId, siteHandle, sitePermissions)
     res.locals.userId = userId
     res.locals.siteHandle = siteHandle
+    res.locals.roles = roles
   } catch(e) {}
   next()
 })
@@ -77,9 +81,12 @@ server.get('/', (req, res) => {
 server.get('/dashboard', requireUser, (req, res) => {
 
   const posts = db.posts.bySiteHandle(res.locals.siteHandle)
+  const site = db.sites.byHandle(res.locals.siteHandle)
 
+  console.log(site)
   res.render('dashboard.liquid', {
-    posts
+    posts,
+    site
   })
 })
 
@@ -98,10 +105,20 @@ server.get('/signup', (req, res) => {
   })
 })
 
+server.get('/editor/new', (req, res) => {
+  const site = db.sites.byHandle(res.locals.siteHandle)
+  res.render('editor.liquid', {
+    post: { id: 'new', title: '', content: '' },
+    site
+  })
+})
+
 server.get('/editor/:id', (req, res) => {
   const post = db.posts.byId(req.params.id)
+  const site = db.sites.byHandle(res.locals.siteHandle)
   res.render('editor.liquid', {
-    post
+    post,
+    site
   })
 })
 
@@ -109,12 +126,69 @@ server.get('/api/posts/:id/content', (req, res) => {
   respond(res, 200, db.posts.contentById(req.params.id).content)
 })
 
-server.post('/api/posts', (req, res) => {
+server.post('/api/posts/:id/publish', async (req, res) => {
   
+  const [ site, siteE ] = safe(db.sites.byHandle, res.locals.siteHandle)
+  if (siteE)
+    return respond(res, 404, postE.message)
+
+  const [ post, postE ] = safe(db.posts.byId, req.params.id)
+  if (postE)
+    return respond(res, 404, postE.message)
+
+  console.log('publishing site', site, post)
+
+  const execP = util.promisify(cp.exec.bind(cp))
+  const writeP = util.promisify(fs.writeFile)
+  await execP(`rm -rf ${__dirname}/themes/${site.themeId}/_posts/*`)
+  await execP(`rm -rf ${process.env.SITES_DIR}/${site.handle}/*`)
+  await writeP(`${__dirname}/themes/${site.themeId}/_posts/2020-07-10-${post.title.replace(/\W/g, '-')}.md`, `---
+layout: "post"
+title:  "${post.title}"
+---
+
+${post.content}
+`)
+  await execP(`cd ${__dirname}/themes/${site.themeId} && bundle exec jekyll build`)
+  await execP(`mkdir -p ${process.env.SITES_DIR}/sites/${site.handle}`)
+  await execP(`cp -r ${__dirname}/themes/${site.themeId}/_site/* ${process.env.SITES_DIR}/${site.handle}`)
+  //await execP(`rm -rf ${__dirname}/themes/${site.themeId}/_site/*`)
 })
 
-server.put('/api/posts/:id', (req, res) => {
+server.post('/api/posts', (req, res) => {
+  
+  if (!res.locals.userId)
+    return respond(res, 400)
 
+  const [ saved, savedE ] = safe(db.posts.create, { 
+    siteHandle: res.locals.siteHandle,
+    userId: res.locals.userId,
+    title: req.body.title,
+    content: req.body.content,
+  })
+
+  if (savedE)
+    return respond(res, 400, savedE.message)
+
+  respond(res, 201, { id: saved.lastInsertRowid })
+})
+
+server.put('/api/posts/:id',  (req, res) => {
+
+  if (!res.locals.userId)
+    return respond(res, 400)
+
+  const [ saved, savedE ] = safe(db.posts.update, { 
+    userId: res.locals.userId,
+    id: req.params.id,
+    title: req.body.title,
+    content: req.body.content
+  })
+
+  if (savedE)
+    return respond(res, 400, savedE.message)
+
+  respond(res, 200)
 })
 
 server.delete('/api/posts/:id', (req, res) => {
@@ -138,7 +212,7 @@ server.post('/api/login', async (req, res) => {
     if (!handle) {
       res.cookie('auth', await jwtSignP({ userId: id }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     } else {
-      res.cookie('auth', await jwtSignP({ userId: id, siteHandle: handle }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+      res.cookie('auth', await jwtSignP({ userId: id, siteHandle: handle, sitePermissions: '' }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     }
     return respond(res, 200)
   }
@@ -175,10 +249,10 @@ server.post('/api/create-site', async (req, res) => {
   const [ site, siteE ] = safe(db.sites.create, { 
     billingSubscriptionId: '',
     billingIsActive: 1,
+    permissions: permissions.forOwner(),
     name,
     handle,
-    userId: res.locals.userId,
-    role: 'owner'
+    userId: res.locals.userId
   })
 
   if (siteE) 
@@ -211,7 +285,7 @@ server.post('/api/create-site', async (req, res) => {
   })
   */
 
-  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteHandle: site.handle }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteHandle: site.handle, sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
 
   respond(res, 201, site)
 })

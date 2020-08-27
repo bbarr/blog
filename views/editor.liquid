@@ -5,12 +5,12 @@
 
 <div x-data="state()">
   <div class="back flex-1">
-    <button x-on:click="back()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
+    <a href="/dashboard" class="h-10 w-10 border border-gray-200 bg-white rounded flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
 
   <div class="actions flex-1 justify-end flex">
-    <button x-on:click="back()" class="h-10 border border-gray-200 bg-white rounded px-4">Publish</a>
-    <button x-on:click="back()" class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
+    <button x-on:click="publish()" class="h-10 border border-gray-200 bg-white rounded px-4">Publish</a>
+    <button x-on:click="openMenu()" class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
   </div>
 
   <div id="editor">
@@ -19,9 +19,18 @@
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<style>
+  .editor-preview { background: inherit; }
+</style>
+<link rel="stylesheet" href="/previews/{{ site.themeId }}/index.css">
+<script src="/easymde.min.js"></script>
 <script>
-  const mde = new EasyMDE()
+
+  const mde = new EasyMDE({ 
+    uploadImage: true, 
+    placeholder: 'Post content', 
+    sideBySideFullscreen: false
+  })
   const toolbar = document.querySelector('.editor-toolbar')
   const _back = document.querySelector('.back')
   const _actions = document.querySelector('.actions')
@@ -29,25 +38,87 @@
   const actions = _actions.parentNode.removeChild(_actions)
   const container = document.createElement('div')
   const title = document.createElement('input')
+  title.setAttribute('placeholder', 'Post title')
   title.setAttribute('x-model', 'title')
-  title.setAttribute('autofocus', 'autofocus')
-  title.classList.add('max-w-2xl', 'm-auto', 'block', 'w-full', 'p-3', 'focus:outline-none', 'text-4xl')
+  const titleWrapper = document.createElement('div')
+  titleWrapper.appendChild(title)
+  {% if post.title.length == 0 %}title.setAttribute('autofocus', 'autofocus'){% endif %}
+  title.classList.add('title')
+  titleWrapper.classList.add('title-wrapper')
   const editor = document.querySelector('.CodeMirror')
-  editor.parentNode.insertBefore(title, editor)
+  editor.parentNode.insertBefore(titleWrapper, editor)
+  const parent = toolbar.parentNode
   container.appendChild(back)
-  container.appendChild(toolbar.cloneNode(true))
+  container.appendChild(toolbar)
   container.appendChild(actions)
-  toolbar.parentNode.replaceChild(container, toolbar)
-  container.classList.add('flex-base', 'px-5', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
-  
+  parent.insertBefore(container, parent.childNodes[0])
+  container.classList.add('flex-base', 'w-full', 'px-4', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
+
   function state() {
 
     const api = {
+      id: '{{ post.id }}',
       title: '{{ post.title }}',
-      back() {
-        window.history.back()
+      content: `{{ post.content }}`,
+      isSaving: false,
+      async save() {
+        const { title, content, id } = api
+        api.isSaving = true
+
+        const [ resp, body ] = await fetch(`/api/posts/${id === 'new' ? '' : id}`, {
+          method: id === 'new' ? 'POST' : 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ title, content })
+        }).then(resp => resp.json().then(body => ([ resp, body ])))
+        if (resp.status === 201 && body.data && body.data.id) {
+          api.id = body.data.id
+          window.history.pushState(null, null, `/editor/${api.id}`)
+        }
+        lastSaved.title = title
+        lastSaved.content = content
+        api.isSaving = false
+      },
+      async publish() {
+        
+        const res = await fetch('/api/posts/{{ post.id }}/publish', {
+          method: 'POST'
+        })
+      },
+      openMenu() {
+
+      },
+      closeMenu() {
+
       }
     }
+
+    mde.codemirror.on('change', () => {
+      api.content = mde.value()
+    })
+
+    let lastSaved = {
+      title: api.title,
+      content: api.content
+    }
+
+    function maybeSave() {
+      if (!api.isSaving && (lastSaved.title !== api.title || lastSaved.content !== api.content)) {
+        console.log('saving!')
+        api.save()
+      }
+    }
+
+    setInterval(maybeSave, 5000)
+
+    title.addEventListener('focus', () => {
+      toolbar.classList.add('hidden')
+    })
+
+    title.addEventListener('blur', () => {
+      toolbar.classList.remove('hidden')
+    })
 
     return api
   }

@@ -23,7 +23,7 @@
         <div class="w-6 h-6 ml-2 mr-1">{% include '_icon.liquid', name: 'search' %}</div>
         <input class="flex-1 outline-none" type="text">
       </div>
-      <button class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
+      <button x-on:click="create()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
     </div>
     <div>
       <div class="pt-3 px-4 border-b border-gray-200">
@@ -47,20 +47,24 @@
       </div>
     </div>
     <div class="my-5 mx-10">
-      <div x-html="preview"></div>
+      <div class="editor-preview" x-html="preview"></div>
     </div>
   </div>
 
 </div>
 
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="/previews/{{ site.themeId }}/index.css">
 <script>
   function state() {
 
     const api = {
-      firstPost: {{ posts | first | json }},
+      firstPost: {% if posts.length > 0 %}{{ posts | first | json }}{% else %}null{% endif %},
       preview: '',
       selectedId: null,
+      create() {
+        window.location.href = `/editor/new`
+      },
       edit() {
         window.location.href = `/editor/${api.selectedId}`
       },
