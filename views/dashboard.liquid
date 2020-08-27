@@ -40,19 +40,21 @@
 
   <div class="flex-1">
     <div class="flex-base h-16 border-b border-gray-200 px-6">
-      <div class="flex-1"></div>
       <div>
-        <button x-on:click="edit()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'edit' %}</span></button>
         <button class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
+        <button x-on:click="edit()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'edit' %}</span></button>
       </div>
+      <div class="flex-1"></div>
     </div>
     <div class="my-5 mx-10">
-      <div class="editor-preview" x-html="preview"></div>
+      <div class="editor-preview max-w-3xl" x-html="preview"></div>
     </div>
   </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <link rel="stylesheet" href="/previews/{{ site.themeId }}/index.css">
 <script>

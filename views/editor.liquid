@@ -23,13 +23,18 @@
   .editor-preview { background: inherit; }
 </style>
 <link rel="stylesheet" href="/previews/{{ site.themeId }}/index.css">
+<script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
 <script src="/easymde.min.js"></script>
 <script>
 
   const mde = new EasyMDE({ 
     uploadImage: true, 
     placeholder: 'Post content', 
-    sideBySideFullscreen: false
+    sideBySideFullscreen: false,
+    renderingConfig: {
+      codeSyntaxHighlighting: true
+    }
   })
   const toolbar = document.querySelector('.editor-toolbar')
   const _back = document.querySelector('.back')

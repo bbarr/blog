@@ -152,6 +152,8 @@ body .EasyMDEContainer.sided--no-fullscreen .CodeMirror {
 }
 
 body .EasyMDEContainer.sided--no-fullscreen .title {
+  max-width: 100%;
+  padding-left: 50px;
 }
 
 body .editor-toolbar.sided--no-fullscreen {
