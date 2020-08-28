@@ -58,6 +58,7 @@ const updateSiteBilling = db.prepare(`
 const selectPostsBySiteHandle = db.prepare('select id, content, title, created_at, updated_at, published_at from post where site_handle=?')
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
+const selectPostByIdLite = db.prepare('select title, published_at from post where id=?')
 const updatePost = db.prepare('update post set title=@title, content=@content where id=@id and user_id=@user_id')
 const insertPost = db.prepare('insert into post (title, content, user_id, site_handle) values (@title, @content, @user_id, @site_handle)')
 
@@ -65,7 +66,10 @@ const insertPost = db.prepare('insert into post (title, content, user_id, site_h
 const insertPermissions = db.prepare('insert into user_site_permission (user_id, site_handle, list) values (@user_id, @site_handle, @list)')
 
 // deploys
-const insertDeploy = db.prepare('insert into deploy (post_id) values (?)')
+const insertDeploy = db.prepare('insert into deploy (post_id, site_handle, theme_id) values (@post_id, @site_handle, @theme_id)')
+const selectNextDeploy = db.prepare('select id, post_id, site_handle, theme_id from deploy limit 1')
+const selectDeployByPostId = db.prepare('select id from deploy where post_id=?')
+const deleteDeploy = db.prepare('delete from deploy where id=?')
 
 module.exports = {
   users: {
@@ -92,11 +96,31 @@ module.exports = {
   posts: {
     bySiteHandle: handle => selectPostsBySiteHandle.all(handle).map(camelKeys),
     byId: id => camelKeys(selectPostById.get(id)),
+    byIdLite: id => camelKeys(selectPostByIdLite.get(id)),
     contentById: id => camelKeys(selectPostContentById.get(id)),
     update: props => updatePost.run(snakeKeys(props)),
     create: props => insertPost.run(snakeKeys(props))
   },
   deploys: {
-    create: postId => insertDeploy(postId)
+    push: db.transaction(props => {
+      if (!selectDeployByPostId.get(props.postId)) {
+        insertDeploy.run(snakeKeys(props))
+      }
+    }),
+    pull: db.transaction(() => {
+      const rawDeploy = selectNextDeploy.get()
+      if (rawDeploy) {
+        const deploy = camelKeys(rawDeploy)
+        if (deploy) deleteDeploy.run(deploy.id)
+        const site = selectSiteByHandle.get(deploy.siteHandle)
+        const post = selectPostById.get(deploy.postId)
+        return [
+          deploy,
+          site,
+          post
+        ]
+      }
+      return []
+    })
   }
 }

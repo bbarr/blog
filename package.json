@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev-css & npm run dev-server",
+    "dev": "npm run dev-css & npm run dev-server & npm run dev-builder",
     "dev-css": "nodemon -w src/ -x npx tailwind build src/base.css -o assets/base.css -c tailwind.config.js",
     "dev-server": "nodemon boot.server.js",
+    "dev-builder": "nodemon boot.builder.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.742.0",
     "bcrypt": "^5.0.0",
     "better-sqlite3": "^7.1.0",
     "body-parser": "^1.19.0",

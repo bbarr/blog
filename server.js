@@ -10,6 +10,7 @@ const uuid = require('uuid')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { Liquid } = require('liquidjs')
+const AWS = require('aws-sdk')
 
 const db = require('./db')
 const permissions = require('./permissions')
@@ -18,6 +19,20 @@ const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
 const server = express()
 const liquid = new Liquid();
+
+AWS.config.update({ 
+  endpoint: process.env.SPACES_ENDPOINT,
+  region: process.env.SPACES_REGION, 
+  accessKeyId: process.env.SPACES_ACCESS_KEY, 
+  secretAccessKey: process.env.SPACES_ACCESS_SECRET,
+  signatureVersion: 'v4'
+})
+
+const s3 = new AWS.S3()
+
+liquid.registerFilter('escapeMarkdown', str => {
+  return str.replace(/`/g, '\\`')
+})
 
 server.engine('liquid', liquid.express())
 server.use(express.static(`${__dirname}/assets`))
@@ -127,32 +142,25 @@ server.get('/api/posts/:id/content', (req, res) => {
 })
 
 server.post('/api/posts/:id/publish', async (req, res) => {
-  
+
   const [ site, siteE ] = safe(db.sites.byHandle, res.locals.siteHandle)
   if (siteE)
     return respond(res, 404, postE.message)
 
-  const [ post, postE ] = safe(db.posts.byId, req.params.id)
-  if (postE)
-    return respond(res, 404, postE.message)
+  console.log('publishing site', site, req.params.id)
 
-  console.log('publishing site', site, post)
+  const [ deployed, deployedE ] = safe(db.deploys.push, {
+    postId: parseInt(req.params.id, 10),
+    siteHandle: res.locals.siteHandle,
+    themeId: site.themeId
+  }) 
 
-  const execP = util.promisify(cp.exec.bind(cp))
-  const writeP = util.promisify(fs.writeFile)
-  await execP(`rm -rf ${__dirname}/themes/${site.themeId}/_posts/*`)
-  await execP(`rm -rf ${process.env.SITES_DIR}/${site.handle}/*`)
-  await writeP(`${__dirname}/themes/${site.themeId}/_posts/2020-07-10-${post.title.replace(/\W/g, '-')}.md`, `---
-layout: "post"
-title:  "${post.title}"
----
+  console.log(deployed, deployedE)
 
-${post.content}
-`)
-  await execP(`cd ${__dirname}/themes/${site.themeId} && bundle exec jekyll build`)
-  await execP(`mkdir -p ${process.env.SITES_DIR}/sites/${site.handle}`)
-  await execP(`cp -r ${__dirname}/themes/${site.themeId}/_site/* ${process.env.SITES_DIR}/${site.handle}`)
-  //await execP(`rm -rf ${__dirname}/themes/${site.themeId}/_site/*`)
+  if (deployedE)
+    return respond(res, 400, deployedE.message)
+
+  respond(res, 200)
 })
 
 server.post('/api/posts', (req, res) => {
@@ -288,6 +296,13 @@ server.post('/api/create-site', async (req, res) => {
   res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteHandle: site.handle, sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
 
   respond(res, 201, site)
+})
+
+server.get('/api/presigned-upload-url', async (req, res) => {
+  const uploadId = `${res.locals.siteHandle}/${uuid.v4()}.jpg`
+  const uploadUrl = await s3.getSignedUrlPromise('putObject', { Bucket: process.env.SPACES_UPLOADS_BUCKET, Key: uploadId, ContentType: 'image/jpeg' })
+  const staticUrl = `https://${process.env.SPACES_UPLOADS_BUCKET}.${process.env.SPACES_ENDPOINT.replace(process.env.SPACES_REGION, `${process.env.SPACES_REGION}.cdn`)}/${uploadId}`
+  respond(res, 200, [ uploadUrl, staticUrl ])
 })
 
 module.exports = server

@@ -34,6 +34,21 @@
     sideBySideFullscreen: false,
     renderingConfig: {
       codeSyntaxHighlighting: true
+    },
+    async imageUploadFunction(file, onSuccess, onError) {
+      const { data, errors } = await fetch('/api/presigned-upload-url').then(resp => resp.json())
+      if (data) {
+        const [ uploadUrl, hostingUrl ] = data
+        const headers = new Headers({
+          'Content-Type': file.type,
+          'x-amz-acl': 'public-read'
+        })
+        return fetch(uploadUrl, {
+          method: 'PUT',
+          headers,
+          body: file
+        }).then(() => onSuccess(hostingUrl))
+      }
     }
   })
   const toolbar = document.querySelector('.editor-toolbar')
@@ -64,7 +79,7 @@
     const api = {
       id: '{{ post.id }}',
       title: '{{ post.title }}',
-      content: `{{ post.content }}`,
+      content: `{{ post.content | escapeMarkdown }}`,
       isSaving: false,
       async save() {
         const { title, content, id } = api

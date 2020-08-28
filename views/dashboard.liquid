@@ -73,7 +73,7 @@
       async selectPost(id) {
         this.selectedId = id
         const content = await fetch(`/api/posts/${id}/content`).then(resp => resp.json()).then(json => json.data)
-        this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: {} } }, content)
+        this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: { codeSyntaxHighlighting: true } } }, content)
       }
     }
 

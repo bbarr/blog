@@ -3,3 +3,5 @@ node_modules/
 certs/
 sites/
 .jekyll-cache/
+themes/*/_site/
+themes/*/_posts/
