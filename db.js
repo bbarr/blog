@@ -55,11 +55,13 @@ const updateSiteBilling = db.prepare(`
 `)
 
 // post
-const selectPostsBySiteHandle = db.prepare('select id, content, title, created_at, updated_at, published_at from post where site_handle=?')
+const selectPostsBySiteHandle = db.prepare('select id, content, title, created_at, updated_at, published_at, latest_published_at from post where site_handle=?')
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
-const selectPostByIdLite = db.prepare('select title, published_at from post where id=?')
-const updatePost = db.prepare('update post set title=@title, content=@content where id=@id and user_id=@user_id')
+const selectPostByIdLite = db.prepare('select title, published_at, latest_published_at from post where id=?')
+const updatePost = db.prepare('update post set updated_at=current_timestamp, title=@title, content=@content where id=@id and user_id=@user_id')
+const updatePostToPublished = db.prepare('update post set published_at=current_timestamp, latest_published_at=current_timestamp where id=?')
+const updatePostToPublishedAgain = db.prepare('update post set latest_published_at=current_timestamp where id=?')
 const insertPost = db.prepare('insert into post (title, content, user_id, site_handle) values (@title, @content, @user_id, @site_handle)')
 
 // permissions
@@ -79,7 +81,10 @@ module.exports = {
     create: db.transaction(props => {
       const info = insertUser.run(snakeKeys(props))
       return selectUserById.get(info.lastInsertRowid)
-    })
+    }),
+    byId(id) {
+      return selectUserById.get(id)
+    }
   },
   sites: {
     defaultByUserId: id => camelKeys(selectDefaultSiteByUserId.get(id)),
@@ -99,7 +104,8 @@ module.exports = {
     byIdLite: id => camelKeys(selectPostByIdLite.get(id)),
     contentById: id => camelKeys(selectPostContentById.get(id)),
     update: props => updatePost.run(snakeKeys(props)),
-    create: props => insertPost.run(snakeKeys(props))
+    create: props => insertPost.run(snakeKeys(props)),
+    markAsPublished: post => post.publishedAt ? updatePostToPublishedAgain.run(post.id) : updatePostToPublished.run(post.id)
   },
   deploys: {
     push: db.transaction(props => {

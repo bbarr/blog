@@ -3,13 +3,13 @@
 
 {% block content %}
 
-<div x-data="state()">
+<div x-data="state()" x-init="init()">
   <div class="back flex-1">
     <a href="/dashboard" class="h-10 w-10 border border-gray-200 bg-white rounded flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
 
   <div class="actions flex-1 justify-end flex">
-    <button x-on:click="publish()" class="h-10 border border-gray-200 bg-white rounded px-4">Publish</a>
+    <button x-show="hasChanges && !isSaving" x-text="publishButtonText" x-on:click="publish()" class="h-10 border border-gray-200 bg-white rounded px-4"></button>
     <button x-on:click="openMenu()" class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
   </div>
 
@@ -75,35 +75,55 @@
   container.classList.add('flex-base', 'w-full', 'px-4', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
 
   function state() {
-
     const api = {
       id: '{{ post.id }}',
       title: '{{ post.title }}',
       content: `{{ post.content | escapeMarkdown }}`,
+      publishButtonText: "Publish{% if post.latestPublishedAt and post.latestPublishedAt < post.updatedAt %} changes{% endif %}",
+      hasChanges: {% if post.latestPublishedAt and post.latestPublishedAt < post.updatedAt %}true{% else %}false{% endif %},
       isSaving: false,
-      async save() {
-        const { title, content, id } = api
-        api.isSaving = true
+      init($dispatch) { 
+        setInterval(() => {
+          if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content)) {
+            console.log('saving!')
+            this.save()
+          }
+        }, 5000)
+      },
+      save() {
 
-        const [ resp, body ] = await fetch(`/api/posts/${id === 'new' ? '' : id}`, {
+        const { title, content, id } = api
+        this.isSaving = true
+
+        return fetch(`/api/posts/${id === 'new' ? '' : id}`, {
           method: id === 'new' ? 'POST' : 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ title, content })
-        }).then(resp => resp.json().then(body => ([ resp, body ])))
-        if (resp.status === 201 && body.data && body.data.id) {
-          api.id = body.data.id
-          window.history.pushState(null, null, `/editor/${api.id}`)
-        }
-        lastSaved.title = title
-        lastSaved.content = content
-        api.isSaving = false
+        })
+          .then(resp => resp.json().then(body => ([ resp, body ])))
+          .then(([ body, resp ]) => {
+
+            if (resp.status === 201 && body.data && body.data.id) {
+              this.id = body.data.id
+              window.history.pushState(null, null, `/editor/${this.id}`)
+            }
+
+            this.publishButtonText = 'Publish changes'
+            this.isSaving = false
+            this.hasChanges = true
+
+            lastSaved.title = title
+            lastSaved.content = content
+            console.log('saved!')
+          })
       },
-      async publish() {
-        
-        const res = await fetch('/api/posts/{{ post.id }}/publish', {
+      publish() {
+        fetch('/api/posts/{{ post.id }}/publish', {
           method: 'POST'
+        }).then(() => {
+          this.publishButtonText = 'Publish'
         })
       },
       openMenu() {
@@ -123,15 +143,6 @@
       content: api.content
     }
 
-    function maybeSave() {
-      if (!api.isSaving && (lastSaved.title !== api.title || lastSaved.content !== api.content)) {
-        console.log('saving!')
-        api.save()
-      }
-    }
-
-    setInterval(maybeSave, 5000)
-
     title.addEventListener('focus', () => {
       toolbar.classList.add('hidden')
     })
@@ -140,6 +151,7 @@
       toolbar.classList.remove('hidden')
     })
 
+    window.api = api
     return api
   }
 </script>

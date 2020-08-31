@@ -49,6 +49,9 @@ ${post.content}
       await execP(`mkdir -p ${process.env.SITES_DIR}/sites/${siteHandle}`)
       await execP(`cp -r ${__dirname}/themes/${themeId}/_site/* ${process.env.SITES_DIR}/${siteHandle}`)
 
+      console.log('marking as published', post)
+      db.posts.markAsPublished(post)
+
       smallWait()
     } catch(e) {
       console.log('Deploy failed', e.message)
