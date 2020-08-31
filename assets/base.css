@@ -710,8 +710,8 @@ a {
 
 form input {
   --border-opacity: 1;
-  border-color: #edf2f7;
-  border-color: rgba(237, 242, 247, var(--border-opacity));
+  border-color: #eeeeee;
+  border-color: rgba(238, 238, 238, var(--border-opacity));
   border-width: 2px;
   border-radius: 0.25rem;
 }
