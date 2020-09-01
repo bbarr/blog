@@ -60,11 +60,15 @@ form input {
 }
 
 .side-menu-link {
-  @apply flex no-underline py-3 px-6;
+  @apply flex no-underline py-3 px-6 text-gray-700;
+}
+
+.side-menu-link:hover {
+  @apply bg-gray-200 text-gray-800;
 }
 
 .side-menu-link.active {
-  @apply bg-gray-200;
+  @apply bg-gray-200 text-gray-900;
 }
 
 .side-menu-link svg {
@@ -80,11 +84,15 @@ form input {
 } 
 
 .post {
-  @apply px-6 py-4;
+  @apply px-6 py-4 border-b border-gray-200 text-gray-600;
+}
+
+.post:hover {
+  @apply cursor-pointer bg-gray-100 text-gray-900;
 }
 
 .post.active {
-  @apply bg-gray-100;
+  @apply bg-gray-100 bg-opacity-50 text-black;
 }
 
 .filter {
@@ -203,6 +211,18 @@ body .editor-preview-full * {
   height: 30%;
   content: " ";
   background: #fbe6a2;
+}
+
+.btn {
+  @apply h-10 px-4 bg-white border border-gray-300 rounded text-gray-600 uppercase tracking-wide font-medium text-sm;
+}
+
+.btn:hover {
+  @apply bg-gray-100 border-gray-400 text-gray-900 shadow;
+}
+
+.btn-icon {
+  @apply w-10 px-0;
 }
 
 @tailwind utilities;

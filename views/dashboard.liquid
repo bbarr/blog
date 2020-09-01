@@ -18,12 +18,12 @@
   </sidebar>
 
   <div class="w-96 border-l border-r border-gray-300">
-    <div class="flex items-center bg-gray-100 h-16 px-4 border-b border-gray-200">
-      <div class="h-10 border border-gray-200 flex-1 mr-2 rounded flex items-center bg-white">
+    <div class="flex items-center bg-gray-100 h-16 px-4 border-b border-gray-300">
+      <div class="h-10 border border-gray-300 hover:border-gray-400 flex-1 mr-2 rounded flex items-center bg-white">
         <div class="w-6 h-6 ml-2 mr-1">{% include '_icon.liquid', name: 'search' %}</div>
         <input class="flex-1 outline-none" type="text">
       </div>
-      <button x-on:click="create()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
+      <button x-on:click="create()" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
     </div>
     <div>
       <!--
@@ -34,7 +34,7 @@
       -->
       {% for post in posts %}
         <div class="post" x-bind:class="{ 'active': selectedId === {{ post.id }} }" x-on:click="selectPost({{ post.id }})">
-          {{ post.title }}
+          <span class="font-medium">{{ post.title }}</span>
           <div class="mt-2 flex justify-between items-center text-xs">
             {% if post.latestPublishedAt %}<span>Published ({{ post.publishedAt | date: '%m/%d/%Y' }})</span>{% else %}<span>Draft</span>{% endif %}
             {% if post.latestPublishedAt and post.latestPublishedAt < post.updatedAt %}<div class="pill info">Unpublished changes</div>{% endif %}
@@ -45,10 +45,9 @@
   </div>
 
   <div class="flex-1">
-    <div class="flex-base h-16 border-b border-gray-200 px-6">
-      <button class="mr-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
-      <button x-on:click="edit()" class="h-10 px-4 border border-gray-200 bg-white rounded">Edit</button>
-      <div class="flex-1"></div>
+    <div class="flex-base justify-end h-16 border-b border-gray-200 px-6 space-x-2">
+      <button x-on:click="edit()" class="btn">Edit</button>
+      <button class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
     </div>
     <div class="my-5 mx-10">
       <div class="editor-preview max-w-3xl" x-html="preview"></div>

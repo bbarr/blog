@@ -5,12 +5,12 @@
 
 <div x-data="state()" x-init="init()">
   <div class="back flex-1">
-    <a href="/dashboard" class="h-10 w-10 border border-gray-200 bg-white rounded flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
+    <a href="/dashboard" class="btn btn-icon flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
 
-  <div class="actions flex-1 justify-end flex">
-    <button x-show="hasChanges && !isSaving" x-text="publishButtonText" x-on:click="publish()" class="h-10 border border-gray-200 bg-white rounded px-4"></button>
-    <button x-on:click="openMenu()" class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
+  <div class="actions flex-1 justify-end flex space-x-2">
+    <button x-show="hasChanges && !isSaving" x-text="publishButtonText" x-on:click="publish()" class="btn"></button>
+    <button x-on:click="openMenu()" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
   </div>
 
   <div id="editor">
