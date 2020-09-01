@@ -105,6 +105,19 @@ server.get('/dashboard', requireUser, (req, res) => {
   })
 })
 
+server.get('/settings', requireUser, (req, res) => {
+
+  const user = db.users.byId(res.locals.userId)
+  const posts = db.posts.bySiteHandle(res.locals.siteHandle)
+  const site = db.sites.byHandle(res.locals.siteHandle)
+
+  res.render('settings.liquid', {
+    user,
+    posts,
+    site
+  })
+})
+
 server.get('/admin/settings', requireUser, (req, res) => {
   res.render('settings.liquid', { sites: [] })
 })

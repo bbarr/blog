@@ -12,8 +12,8 @@
       <p class="uppercase text-gray-600 mt-10 mb-2">Category</p>
     </div>
     <nav>
-      <a class="side-menu-link active" href="#">{% include '_icon.liquid', name: 'page' %}Posts</a>
-      <a class="side-menu-link" href="#">{% include '_icon.liquid', name: 'cog' %}Settings</a>
+      <a class="side-menu-link active" href="/dashboard">{% include '_icon.liquid', name: 'page' %}Posts</a>
+      <a class="side-menu-link" href="/settings">{% include '_icon.liquid', name: 'cog' %}Settings</a>
     </nav>
   </sidebar>
 
@@ -26,13 +26,19 @@
       <button x-on:click="create()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
     </div>
     <div>
+      <!--
       <div class="pt-3 px-4 border-b border-gray-200">
         <button class="filter active-filter">Drafts</a>
         <button class="filter">Published</a>
       </div>
+      -->
       {% for post in posts %}
         <div class="post" x-bind:class="{ 'active': selectedId === {{ post.id }} }" x-on:click="selectPost({{ post.id }})">
           {{ post.title }}
+          <div class="mt-2 flex justify-between items-center text-xs">
+            {% if post.latestPublishedAt %}<span>Published ({{ post.publishedAt | date: '%m/%d/%Y' }})</span>{% else %}<span>Draft</span>{% endif %}
+            {% if post.latestPublishedAt and post.latestPublishedAt < post.updatedAt %}<div class="pill info">Unpublished changes</div>{% endif %}
+          </div>
         </div>
       {% endfor %}
     </div>
@@ -40,10 +46,8 @@
 
   <div class="flex-1">
     <div class="flex-base h-16 border-b border-gray-200 px-6">
-      <div>
-        <button class="ml-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
-        <button x-on:click="edit()" class="h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'edit' %}</span></button>
-      </div>
+      <button class="mr-2 h-10 w-10 border border-gray-200 bg-white rounded"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
+      <button x-on:click="edit()" class="h-10 px-4 border border-gray-200 bg-white rounded">Edit</button>
       <div class="flex-1"></div>
     </div>
     <div class="my-5 mx-10">

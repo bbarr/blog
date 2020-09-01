@@ -47,6 +47,10 @@ a {
   @apply mb-4 w-full border-gray-200 border-2 rounded text-lg h-10 px-2;
 }
 
+form input {
+  @apply border-gray-200 border-2 rounded;
+}
+
 .button {
   @apply bg-gray-800 text-white text-center w-full py-3 rounded;
 }
@@ -66,6 +70,14 @@ a {
 .side-menu-link svg {
   @apply w-6 mr-2;
 }
+
+.pill {
+  @apply bg-white border rounded-full py-1 px-2 text-xs uppercase;
+}
+
+.pill.info {
+  @apply bg-yellow-100;
+} 
 
 .post {
   @apply px-6 py-4;

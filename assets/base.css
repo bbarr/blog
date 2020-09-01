@@ -708,6 +708,14 @@ a {
   padding-right: 0.5rem;
 }
 
+form input {
+  --border-opacity: 1;
+  border-color: #eeeeee;
+  border-color: rgba(238, 238, 238, var(--border-opacity));
+  border-width: 2px;
+  border-radius: 0.25rem;
+}
+
 .button {
   --bg-opacity: 1;
   background-color: #424242;
@@ -750,6 +758,26 @@ a {
 .side-menu-link svg {
   width: 1.5rem;
   margin-right: 0.5rem;
+}
+
+.pill {
+  --bg-opacity: 1;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, var(--bg-opacity));
+  border-width: 1px;
+  border-radius: 9999px;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.pill.info {
+  --bg-opacity: 1;
+  background-color: #fffff0;
+  background-color: rgba(255, 255, 240, var(--bg-opacity));
 }
 
 .post {
