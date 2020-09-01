@@ -14,6 +14,7 @@ const AWS = require('aws-sdk')
 
 const db = require('./db')
 const permissions = require('./permissions')
+const domain = require('./domain')
 
 const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
@@ -154,24 +155,30 @@ server.get('/api/posts/:id/content', (req, res) => {
   respond(res, 200, db.posts.contentById(req.params.id).content)
 })
 
+server.delete('/api/posts/:id', async (req, res) => {
+
+  const [ _, deletedE ] = await safeP(domain.deletePost({ id: req.params.id, siteHandle: res.locals.siteHandle, userId: res.locals.userId }))
+  if (deletedE) {
+    return respond(res, 400, deletedE.message)
+  }
+
+  respond(res, 200)
+})
+
+server.post('/api/posts/:id/unpublish', async (req, res) => {
+
+  const [ _, unpublishedE ] = await safeP(domain.unpublishPost({ id: req.params.id, siteHandle: res.locals.siteHandle }))
+  if (unpublishedE) 
+    return respond(res, 400, unpublishedE.message)
+
+  respond(res, 200)
+})
+
 server.post('/api/posts/:id/publish', async (req, res) => {
 
-  const [ site, siteE ] = safe(db.sites.byHandle, res.locals.siteHandle)
-  if (siteE)
-    return respond(res, 404, postE.message)
-
-  console.log('publishing site', site, req.params.id)
-
-  const [ deployed, deployedE ] = safe(db.deploys.push, {
-    postId: parseInt(req.params.id, 10),
-    siteHandle: res.locals.siteHandle,
-    themeId: site.themeId
-  }) 
-
-  console.log(deployed, deployedE)
-
-  if (deployedE)
-    return respond(res, 400, deployedE.message)
+  const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteHandle: res.locals.siteHandle }))
+  if (publishedE)
+    return respond(res, 400, publishedE.message)
 
   respond(res, 200)
 })

@@ -789,6 +789,16 @@ form input {
   text-transform: uppercase;
 }
 
+.menu {
+  width: 300px;
+  transition: transform .5s ease-in-out;
+  transform: translate3d(300px, 0, 0);
+}
+
+.menu.open {
+  transform: translate3d(0, 0, 0);
+}
+
 .pill.info {
   --bg-opacity: 1;
   background-color: #fffff0;

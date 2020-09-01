@@ -62,15 +62,16 @@ const selectPostByIdLite = db.prepare('select title, published_at, latest_publis
 const updatePost = db.prepare('update post set updated_at=current_timestamp, title=@title, content=@content where id=@id and user_id=@user_id')
 const updatePostToPublished = db.prepare('update post set published_at=current_timestamp, latest_published_at=current_timestamp where id=?')
 const updatePostToPublishedAgain = db.prepare('update post set latest_published_at=current_timestamp where id=?')
+const updatePostToUnpublished = db.prepare('update post set published_at=null, latest_published_at=null where id=?')
 const insertPost = db.prepare('insert into post (title, content, user_id, site_handle) values (@title, @content, @user_id, @site_handle)')
+const deletePostById = db.prepare('delete from post where id=@id and user_id=@user_id')
 
 // permissions
 const insertPermissions = db.prepare('insert into user_site_permission (user_id, site_handle, list) values (@user_id, @site_handle, @list)')
 
 // deploys
-const insertDeploy = db.prepare('insert into deploy (post_id, site_handle, theme_id) values (@post_id, @site_handle, @theme_id)')
-const selectNextDeploy = db.prepare('select id, post_id, site_handle, theme_id from deploy limit 1')
-const selectDeployByPostId = db.prepare('select id from deploy where post_id=?')
+const insertDeploy = db.prepare('insert into deploy (site_handle) values (@site_handle)')
+const selectNextDeploy = db.prepare('select id, site_handle from deploy limit 1')
 const deleteDeploy = db.prepare('delete from deploy where id=?')
 
 module.exports = {
@@ -105,14 +106,12 @@ module.exports = {
     contentById: id => camelKeys(selectPostContentById.get(id)),
     update: props => updatePost.run(snakeKeys(props)),
     create: props => insertPost.run(snakeKeys(props)),
-    markAsPublished: post => post.publishedAt ? updatePostToPublishedAgain.run(post.id) : updatePostToPublished.run(post.id)
+    delete: props => deletePostById.run(snakeKeys(props)),
+    markAsPublished: post => post.publishedAt ? updatePostToPublishedAgain.run(post.id) : updatePostToPublished.run(post.id),
+    markAsUnpublished: post => updatePostToUnpublished.run(post.id)
   },
   deploys: {
-    push: db.transaction(props => {
-      if (!selectDeployByPostId.get(props.postId)) {
-        insertDeploy.run(snakeKeys(props))
-      }
-    }),
+    push: (props) => insertDeploy.run(snakeKeys(props)),
     pull: db.transaction(() => {
       const rawDeploy = selectNextDeploy.get()
       if (rawDeploy) {

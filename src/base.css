@@ -79,6 +79,16 @@ form input {
   @apply bg-white border rounded-full py-1 px-2 text-xs uppercase;
 }
 
+.menu {
+  width: 300px;
+  transition: transform .5s ease-in-out;
+  transform: translate3d(300px, 0, 0);
+}
+
+.menu.open {
+  transform: translate3d(0, 0, 0);
+}
+
 .pill.info {
   @apply bg-yellow-100;
 } 

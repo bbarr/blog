@@ -14,7 +14,7 @@ prosaic.foo {
 
 *.prosaic.foo {
 	tls ./certs/_wildcard.prosaic.foo.pem ./certs/_wildcard.prosaic.foo-key.pem
-	root * /Users/bbarr/web/ballast/blog/sites/{http.request.host.labels.2}
+	root * /Users/bbarr/web/ballast/blog/sites/{http.request.host.labels.2}/_site
 	file_server
   log {
     level DEBUG

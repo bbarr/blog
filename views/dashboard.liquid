@@ -17,6 +17,12 @@
     </nav>
   </sidebar>
 
+  <div x-bind:class="{ 'open': isMenuOpen }" class="menu fixed right-0 mt-16 top-0 bottom-0 border border-t-0">
+    <div class="p-4">
+      <button class="button" x-on:click="_delete()">Delete</button>
+    </div>
+  </div>
+
   <div class="w-96 border-l border-r border-gray-300">
     <div class="flex items-center bg-gray-100 h-16 px-4 border-b border-gray-300">
       <div class="h-10 border border-gray-300 hover:border-gray-400 flex-1 mr-2 rounded flex items-center bg-white">
@@ -47,7 +53,7 @@
   <div class="flex-1">
     <div class="flex-base justify-end h-16 border-b border-gray-200 px-6 space-x-2">
       <button x-on:click="edit()" class="btn">Edit</button>
-      <button class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
+      <button x-on:click="isMenuOpen ? isMenuOpen = false : isMenuOpen = true" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
     </div>
     <div class="my-5 mx-10">
       <div class="editor-preview max-w-3xl" x-html="preview"></div>
@@ -66,6 +72,7 @@
     const api = {
       firstPost: {% if posts.length > 0 %}{{ posts | first | json }}{% else %}null{% endif %},
       preview: '',
+      isMenuOpen: false,
       selectedId: null,
       create() {
         window.location.href = `/editor/new`
@@ -77,6 +84,15 @@
         this.selectedId = id
         const content = await fetch(`/api/posts/${id}/content`).then(resp => resp.json()).then(json => json.data)
         this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: { codeSyntaxHighlighting: true } } }, content)
+      },
+      _delete() {
+        if (api.selectedId && confirm('Are you sure you want to delete this post? This is permenant.')) {
+          fetch(`/api/posts/${api.selectedId}`, {
+            method: 'DELETE'
+          }).then((resp) => {
+            //window.location.reload()
+          })
+        }
       }
     }
 
