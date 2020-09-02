@@ -52,7 +52,11 @@ form input {
 }
 
 .button {
-  @apply bg-gray-800 text-white text-center w-full py-3 rounded;
+  @apply bg-gray-800 text-white text-center tracking-wide w-full py-3 rounded;
+}
+
+.button:hover {
+  @apply bg-gray-900 shadow;
 }
 
 .button[disabled="disabled"] {
@@ -233,6 +237,25 @@ body .editor-preview-full * {
 
 .btn-icon {
   @apply w-10 px-0;
+}
+
+.field-label {
+  @apply block;
+}
+
+.field-input {
+  @apply mt-1 block w-full appearance-none bg-white border border-solid border-gray-300 rounded px-3 py-2 text-base leading-normal transition-colors duration-150 ease-in shadow-none text-gray-900;
+}
+
+.field-select {
+  @apply mt-1 block w-full appearance-none bg-white border border-solid border-gray-300 rounded pl-3 pr-10 py-2 text-base leading-normal transition-colors duration-150 ease-in shadow-none text-gray-900 bg-no-repeat cursor-pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M16.293 9.293L12 13.586 7.707 9.293 6.293 10.707 12 16.414 17.707 10.707z'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+}
+
+.field-input:hover, .field-select:hover, .field-checkbox:hover, .field-radio:hover{
+  @apply border-gray-600;
 }
 
 @tailwind utilities;

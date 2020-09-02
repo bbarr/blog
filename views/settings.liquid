@@ -17,35 +17,35 @@
     </nav>
   </sidebar>
 
-  <div class="flex-1 p-6">
-    <h2 class="">User settings</h1>
-    <form x-on:submit="saveUser()">
+  <div class="flex-1 p-6 border-l border-r max-w-lg">
+    <h2 class="border-b pb-4 font-medium text-lg">User settings</h1>
+    <form x-on:submit="saveUser()" class="space-y-4">
       <div>
-        <label>Name</label>
-        <input type="text">
+        <label class="field-label" for="name">Name</label>
+        <input class="field-input" id="name" type="text">
       </div>
       <div>
-        <label>Email</label>
-        <input type="email">
+        <label class="field-label" for="email">Email</label>
+        <input class="field-input" id="email" type="email">
       </div>
       <div>
-        <label>Profile Picture</label>
-        <input type="file">
+        <label class="field-label" for="picture">Profile Picture</label>
+        <input class="field-input" id="picture" type="file">
       </div>
     </form>
-    <h2 class="">Blog settings</h1>
-    <form x-on:submit="saveBlog()">
+    <h2 class="border-b mt-8 pb-4 font-medium text-lg">Blog settings</h1>
+    <form x-on:submit="saveBlog()" class="space-y-4">
       <div>
-        <label>Title</label>
-        <input type="text">
+        <label class="field-label" for="title">Title</label>
+        <input class="field-input" id="title" type="text">
       </div>
       <div>
-        <label>Description</label>
-        <input type="text">
+        <label class="field-label" for="description">Description</label>
+        <input class="field-input" id="description" type="text">
       </div>
       <div>
-        <label>Time Zone</label>
-        <select id="timezone-offset">
+        <label class="field-label" for="timezone-offset">Time Zone</label>
+        <select class="field-select" id="timezone-offset">
           <option value="-12:00">(GMT -12:00) Eniwetok, Kwajalein</option>
           <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
           <option value="-10:00">(GMT -10:00) Hawaii</option>
@@ -89,12 +89,12 @@
         </select>
       </div>
       <div>
-        <label>Favicon</label>
-        <input type="file">
+        <label class="field-label" for="favicon">Favicon</label>
+        <input class="field-input" id="favicon" type="file">
       </div>
       <div>
-        <label>Subdomain</label>
-        <input type="text" disabled>
+        <label class="field-label" for="subdomain">Subdomain</label>
+        <input class="field-input" id="subdomain" type="text" disabled>
       </div>
       <div class="w-48">
         <button class="button">Update billing</button>

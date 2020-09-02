@@ -724,10 +724,18 @@ form input {
   color: #fff;
   color: rgba(255, 255, 255, var(--text-opacity));
   text-align: center;
+  letter-spacing: 0.025em;
   width: 100%;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   border-radius: 0.25rem;
+}
+
+.button:hover {
+  --bg-opacity: 1;
+  background-color: #212121;
+  background-color: rgba(33, 33, 33, var(--bg-opacity));
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .button[disabled="disabled"] {
@@ -1017,6 +1025,83 @@ body .editor-preview-full * {
   width: 2.5rem;
   padding-left: 0;
   padding-right: 0;
+}
+
+.field-label {
+  display: block;
+}
+
+.field-input {
+  margin-top: 0.25rem;
+  display: block;
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  --bg-opacity: 1;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, var(--bg-opacity));
+  border-width: 1px;
+  border-style: solid;
+  --border-opacity: 1;
+  border-color: #e0e0e0;
+  border-color: rgba(224, 224, 224, var(--border-opacity));
+  border-radius: 0.25rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  box-shadow: none;
+  --text-opacity: 1;
+  color: #212121;
+  color: rgba(33, 33, 33, var(--text-opacity));
+}
+
+.field-select {
+  margin-top: 0.25rem;
+  display: block;
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  --bg-opacity: 1;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, var(--bg-opacity));
+  border-width: 1px;
+  border-style: solid;
+  --border-opacity: 1;
+  border-color: #e0e0e0;
+  border-color: rgba(224, 224, 224, var(--border-opacity));
+  border-radius: 0.25rem;
+  padding-left: 0.75rem;
+  padding-right: 2.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  box-shadow: none;
+  --text-opacity: 1;
+  color: #212121;
+  color: rgba(33, 33, 33, var(--text-opacity));
+  background-repeat: no-repeat;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M16.293 9.293L12 13.586 7.707 9.293 6.293 10.707 12 16.414 17.707 10.707z'/%3E%3C/svg%3E");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+}
+
+.field-input:hover, .field-select:hover, .field-checkbox:hover, .field-radio:hover{
+  --border-opacity: 1;
+  border-color: #757575;
+  border-color: rgba(117, 117, 117, var(--border-opacity));
 }
 
 .space-y-0 > :not(template) ~ :not(template) {
