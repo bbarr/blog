@@ -26,6 +26,11 @@
     <textarea>{{ post.content }}</textarea>
   </div>
 
+  <div class="alert" x-bind:class="{ 'open': alert.open }">
+    <div x-show="alert.title" class="alert-title" x-text="alert.title"></div>
+    <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
+  </div>
+
   <div class="snowman-menu" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
     <a x-show="post.latestPublishedAt && post.latestPublishedAt < post.updatedAt" href="#" x-on:click="publish()">Publish changes</a>
     <a x-show="!post.latestPublishedAt && post.updatedAt" href="#" x-on:click="publish()">Publish</a>
@@ -100,6 +105,7 @@
   {% endif %}
 
   function state() {
+
     const api = {
       post: {{ post | json }},
       id: '{{ post.id }}',
@@ -115,13 +121,21 @@
       hasChanges: {% if post.updatedAt > post.latestPublishedAt or post.latestPublishedAt == null and post.updatedAt %}true{% else %}false{% endif %},
       isMenuOpen: false,
       isSaving: false,
+      alert: {},
       init($dispatch) { 
+
+        let lastTyped = Date.now()
+        window.addEventListener('keyup', e => {
+          lastTyped = Date.now()
+        })
+
         setInterval(() => {
-          if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content)) {
-            console.log('saving!')
-            this.save()
+          if (lastTyped < Date.now() - 1000) {
+            if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content)) {
+              this.save()
+            }
           }
-        }, 5000)
+        }, 2000)
       },
       save() {
 
@@ -148,6 +162,7 @@
             lastSaved.title = title
             lastSaved.content = content
             console.log('saved!')
+            this.setAlert('Post saved!')
           })
       },
       publish() {
@@ -158,6 +173,7 @@
           this.publishButtonText = 'Publish changes'
           this.hasChanges = false
           this.isPublished = true
+          this.setAlert('Post published!')
         })
       },
       unpublish() {
@@ -171,6 +187,7 @@
             this.hasChanges = true
             this.publishButtonText = 'Publish'
             this.isMenuOpen = false
+            this.setAlert('Post unpublished', 'It will not appear on your blog.')
           })
         }
       },
@@ -185,7 +202,12 @@
             window.location.href = '/dashboard'
           })
         }
-      }
+      },
+
+      setAlert(title, content, timeout=3000) {
+        this.alert = { title, content, open: true }
+        setTimeout(() => this.alert = { title, content }, timeout)
+      },
     }
 
     mde.codemirror.on('change', () => {

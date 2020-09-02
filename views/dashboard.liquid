@@ -25,6 +25,11 @@
   </div>
   -->
 
+  <div class="alert" x-bind:class="{ 'open': alert.open }">
+    <div x-show="alert.title" class="alert-title" x-text="alert.title"></div>
+    <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
+  </div>
+
   <div class="w-96 border-l border-r border-gray-300">
     <div class="flex items-center bg-gray-100 h-16 px-4 border-b border-gray-300">
       <!--
@@ -93,6 +98,7 @@
       isMenuOpen: false,
       selectedId: null,
       selectedPost: null,
+      alert: {},
       create() {
         window.location.href = `/editor/new`
       },
@@ -105,17 +111,17 @@
         }).then(() => {
           this.isMenuOpen = false
           this.selectPost(this.selectedId)
+          this.setAlert('Post published!')
         })
       },
       unpublish() {
-        if (confirm('Are you sure you want to unpublish this post?')) {
-          fetch(`/api/posts/${this.selectedId}/unpublish`, {
-            method: 'POST'
-          }).then((resp) => {
-            this.isMenuOpen = false
-            this.selectPost(this.selectedId)
-          })
-        }
+        fetch(`/api/posts/${this.selectedId}/unpublish`, {
+          method: 'POST'
+        }).then((resp) => {
+          this.isMenuOpen = false
+          this.selectPost(this.selectedId)
+          this.setAlert('Post unpublished', 'It will not appear on your blog.')
+        })
       },
       async selectPost(id) {
         this.selectedId = id
@@ -124,6 +130,10 @@
         this.selectedPost = post
         const index = this.posts.findIndex(p => p.id == post.id)
         this.posts[index] = post
+      },
+      setAlert(title, content, timeout=3000) {
+        this.alert = { title, content, open: true }
+        setTimeout(() => this.alert = { title, content }, timeout)
       },
       _delete() {
         if (api.selectedId && confirm('Are you sure you want to delete this post? This is permenant.')) {

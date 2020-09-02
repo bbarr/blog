@@ -1136,6 +1136,41 @@ body .editor-preview-full * {
   background-color: rgba(245, 245, 245, var(--bg-opacity));
 }
 
+.alert {
+  position: fixed;
+  right: 0;
+  top: 0;
+  border-width: 1px;
+  border-radius: 0.25rem;
+  width: 100%;
+  --bg-opacity: 1;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, var(--bg-opacity));
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin-top: 5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  width: 300px;
+  box-sizing: border-box;
+  transition: transform .5s ease-in-out;
+  transform: translate3d(300px, 0, 0);
+}
+
+.alert.open {
+  transform: translate3d(-20px, 0, 0);
+}
+
+.alert-title {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.alert-content {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 .space-y-0 > :not(template) ~ :not(template) {
   --space-y-reverse: 0;
   margin-top: calc(0px * calc(1 - var(--space-y-reverse)));
