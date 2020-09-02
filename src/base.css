@@ -258,4 +258,17 @@ body .editor-preview-full * {
   @apply border-gray-600;
 }
 
+.snowman-menu {
+  @apply fixed right-0 top-0 mr-6 border rounded w-full w-48 bg-white py-1;
+  margin-top: 3.6rem;
+}
+
+.snowman-menu a {
+  @apply block px-4 py-2 no-underline;
+}
+
+.snowman-menu a:hover {
+  @apply bg-gray-100;
+}
+
 @tailwind utilities;

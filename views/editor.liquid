@@ -13,15 +13,24 @@
     <button x-on:click="isMenuOpen ? isMenuOpen = false : isMenuOpen = true" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
   </div>
 
+  <!--
   <div x-bind:class="{ 'open': isMenuOpen }" class="menu fixed right-0 mt-16 top-0 bottom-0 border border-t-0">
     <div class="p-4">
       <button x-show="isPublished" class="button mb-2" x-on:click="unpublish()">Unpublish</button>
       <button class="button" x-on:click="_delete()">Delete</button>
     </div>
   </div>
+  -->
 
   <div id="editor">
     <textarea>{{ post.content }}</textarea>
+  </div>
+
+  <div class="snowman-menu" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
+    <a x-show="post.latestPublishedAt && post.latestPublishedAt < post.updatedAt" href="#" x-on:click="publish()">Publish changes</a>
+    <a x-show="!post.latestPublishedAt && post.updatedAt" href="#" x-on:click="publish()">Publish</a>
+    <a x-show="post && post.latestPublishedAt" href="#" x-on:click="unpublish()">Unpublish</a>
+    <a href="#" x-on:click="_delete()">Delete</a>
   </div>
 </div>
 
@@ -59,7 +68,7 @@
     }
   })
   const toolbar = document.querySelector('.editor-toolbar')
-  const menu = document.querySelector('.menu')
+  //const menu = document.querySelector('.menu')
   const _back = document.querySelector('.back')
   const _actions = document.querySelector('.actions')
   const back = _back.parentNode.removeChild(_back)
@@ -81,7 +90,7 @@
   container.appendChild(actions)
   parent.insertBefore(container, parent.childNodes[0])
   container.classList.add('flex-base', 'w-full', 'px-4', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
-  container.appendChild(menu)
+  //container.appendChild(menu)
 
   {% if post.latestPublishedAt < post.updatedAt and post.updatedAt != null and post.latestPublishedAt != null %}
     {% assign startWithChanges = true %}
@@ -144,7 +153,8 @@
       publish() {
         fetch(`/api/posts/${this.id}/publish`, {
           method: 'POST'
-        }).then(() => {
+        }).then(async () => {
+          this.post = await fetch(`/api/posts/${this.id}`).then(resp => resp.json()).then(json => json.data)
           this.publishButtonText = 'Publish changes'
           this.hasChanges = false
           this.isPublished = true
@@ -154,8 +164,9 @@
         if (confirm('Are you sure you want to unpublish this post?')) {
           fetch(`/api/posts/${api.id}/unpublish`, {
             method: 'POST'
-          }).then((resp) => {
+          }).then(async (resp) => {
             //window.location.reload()
+            this.post = await fetch(`/api/posts/${this.id}`).then(resp => resp.json()).then(json => json.data)
             this.isPublished = false
             this.hasChanges = true
             this.publishButtonText = 'Publish'

@@ -151,6 +151,10 @@ server.get('/editor/:id', (req, res) => {
   })
 })
 
+server.get('/api/posts/:id', (req, res) => {
+  respond(res, 200, db.posts.byId(req.params.id))
+})
+
 server.get('/api/posts/:id/content', (req, res) => {
   respond(res, 200, db.posts.contentById(req.params.id).content)
 })

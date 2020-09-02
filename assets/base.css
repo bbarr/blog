@@ -1104,6 +1104,38 @@ body .editor-preview-full * {
   border-color: rgba(117, 117, 117, var(--border-opacity));
 }
 
+.snowman-menu {
+  position: fixed;
+  right: 0;
+  top: 0;
+  margin-right: 1.5rem;
+  border-width: 1px;
+  border-radius: 0.25rem;
+  width: 100%;
+  width: 12rem;
+  --bg-opacity: 1;
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, var(--bg-opacity));
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  margin-top: 3.6rem;
+}
+
+.snowman-menu a {
+  display: block;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  text-decoration: none;
+}
+
+.snowman-menu a:hover {
+  --bg-opacity: 1;
+  background-color: #f5f5f5;
+  background-color: rgba(245, 245, 245, var(--bg-opacity));
+}
+
 .space-y-0 > :not(template) ~ :not(template) {
   --space-y-reverse: 0;
   margin-top: calc(0px * calc(1 - var(--space-y-reverse)));
