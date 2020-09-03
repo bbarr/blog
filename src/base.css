@@ -272,9 +272,10 @@ body .editor-preview-full * {
 }
 
 .alert {
-  @apply fixed right-0 top-0 border rounded w-full bg-white py-1 mt-20 px-8;
+  @apply fixed right-0 top-0 border rounded w-full bg-white py-1 mt-20 px-8 shadow-md;
   width: 300px;
   box-sizing: border-box;
+  border-left: 6px solid black;
   transition: transform .5s ease-in-out;
   transform: translate3d(300px, 0, 0);
 }
@@ -284,7 +285,7 @@ body .editor-preview-full * {
 }
 
 .alert-title {
-  @apply py-2;
+  @apply py-2 font-bold;
 }
 
 .alert-content {
