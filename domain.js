@@ -26,7 +26,7 @@ const api = {
     const sitePath = `${process.env.SITES_DIR}/${siteHandle}`
     const post = db.posts.byId(id)
     const date = new Date(post.latestPublishedAt || (new Date()).toISOString())
-    const postPath = `${sitePath}/_posts/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-${post.title.replace(/\W/g, '-')}.md`
+    const postPath = `${sitePath}/_posts/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-${post.title.toLowerCase().replace(/\W/g, '-')}.md`
 
     await writeP(postPath, `---
 layout: "post"
@@ -47,7 +47,7 @@ ${post.content}`)
     const sitePath = `${process.env.SITES_DIR}/${siteHandle}`
     const post = db.posts.byId(id)
     const date = new Date(post.latestPublishedAt || (new Date()).toISOString())
-    const postPath = `${sitePath}/_posts/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-${post.title.replace(/\W/g, '-')}.md`
+    const postPath = `${sitePath}/_posts/${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}-${post.title.toLowerCase().replace(/\W/g, '-')}.md`
 
     console.log('unlinking ', postPath)
     await unlinkP(postPath)

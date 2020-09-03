@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<div x-data="state()" x-init="init()">
+<div class="mt-24" x-data="state()" x-init="init()">
   <div class="back flex-1">
     <a href="/dashboard" class="btn btn-icon flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
@@ -94,7 +94,7 @@
   container.appendChild(toolbar)
   container.appendChild(actions)
   parent.insertBefore(container, parent.childNodes[0])
-  container.classList.add('flex-base', 'w-full', 'px-4', 'h-16', 'border-b', 'border-gray-200', 'mb-10');
+  container.classList.add('fixed', 'bg-white', 'z-10', 'top-0', 'flex-base', 'w-full', 'px-4', 'h-16', 'border-b', 'border-gray-200');
   //container.appendChild(menu)
 
   {% if post.latestPublishedAt < post.updatedAt and post.updatedAt != null and post.latestPublishedAt != null %}

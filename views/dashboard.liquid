@@ -1,5 +1,5 @@
 
-{% layout "layout.liquid" %}
+{% layout "layout.liquid", hideOverflow: true %}
 
 {% block content %}
 
@@ -41,7 +41,7 @@
       <div class="flex-1"></div>
       <button x-on:click="create()" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'plus' %}</span></button>
     </div>
-    <div>
+    <div style="height: calc(100vh - 4rem); overflow-y: auto;">
       <!--
       <div class="pt-3 px-4 border-b border-gray-200">
         <button class="filter active-filter">Drafts</a>
@@ -69,7 +69,7 @@
       <button x-on:click="edit()" class="btn">Edit</button>
       <button x-on:click="isMenuOpen ? isMenuOpen = false : isMenuOpen = true" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
     </div>
-    <div class="my-5 mx-10">
+    <div class="py-5 px-10" style="height: calc(100vh - 4rem); overflow-y: auto;">
       <div class="editor-preview max-w-3xl" x-html="preview"></div>
     </div>
   </div>
