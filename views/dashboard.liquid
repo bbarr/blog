@@ -77,10 +77,10 @@
 
   <div class="snowman-menu" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
     <a :href="'/editor/' + (selectedPost && selectedPost.id)">Edit</a>
-    <a x-show="selectedPost && selectedPost.latestPublishedAt && selectedPost.latestPublishedAt < selectedPost.updatedAt" href="#" x-on:click="publish()">Publish changes</a>
-    <a x-show="selectedPost && !selectedPost.latestPublishedAt && selectedPost.updatedAt" href="#" x-on:click="publish()">Publish</a>
-    <a x-show="selectedPost && selectedPost.latestPublishedAt" href="#" x-on:click="unpublish()">Unpublish</a>
-    <a href="#" x-on:click="_delete()">Delete</a>
+    <a x-show="selectedPost && selectedPost.latestPublishedAt && selectedPost.latestPublishedAt < selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish changes</a>
+    <a x-show="selectedPost && !selectedPost.latestPublishedAt && selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish</a>
+    <a x-show="selectedPost && selectedPost.latestPublishedAt" href="#" x-on:click.prevent="unpublish()">Unpublish</a>
+    <a href="#" x-on:click.prevent="_delete()">Delete</a>
   </div>
 
 </div>
@@ -136,11 +136,15 @@
         setTimeout(() => this.alert = { title, content }, timeout)
       },
       _delete() {
+        this.isMenuOpen = false
         if (api.selectedId && confirm('Are you sure you want to delete this post? This is permenant.')) {
           fetch(`/api/posts/${api.selectedId}`, {
             method: 'DELETE'
           }).then((resp) => {
-            //window.location.reload()
+            const index = this.posts.findIndex(p => p.id == api.selectedId)
+            this.posts.splice(index, 1)
+            const next = this.posts[Math.max(index, 0)]
+            next ? api.selectPost(next.id) : window.location.reload()
           })
         }
       }
