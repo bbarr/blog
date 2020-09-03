@@ -73,10 +73,10 @@ const safeP = p => p.then(
 server.use(async (req, res, next) => {
   try {
     const jwt = req.signedCookies.auth
-    const { userId, siteHandle, sitePermissions } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
-    console.log('auth!', userId, siteHandle, sitePermissions)
+    const { userId, siteId, sitePermissions } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
+    console.log('auth!', userId, siteId, sitePermissions)
     res.locals.userId = userId
-    res.locals.siteHandle = siteHandle
+    res.locals.siteId = siteId
     res.locals.roles = roles
   } catch(e) {}
   next()
@@ -85,7 +85,7 @@ server.use(async (req, res, next) => {
 function requireUser(req, res, next) {
   if (!res.locals.userId)
     return res.redirect('/login')
-  if (res.locals.userId && !res.locals.siteHandle)
+  if (res.locals.userId && !res.locals.siteId)
     return res.redirect('/signup')
   next()
 }
@@ -96,8 +96,8 @@ server.get('/', (req, res) => {
 
 server.get('/dashboard', requireUser, (req, res) => {
 
-  const posts = db.posts.bySiteHandle(res.locals.siteHandle)
-  const site = db.sites.byHandle(res.locals.siteHandle)
+  const posts = db.posts.bySiteId(res.locals.siteId)
+  const site = db.sites.byId(res.locals.siteId)
 
   console.log(site)
   res.render('dashboard.liquid', {
@@ -109,8 +109,8 @@ server.get('/dashboard', requireUser, (req, res) => {
 server.get('/settings', requireUser, (req, res) => {
 
   const user = db.users.byId(res.locals.userId)
-  const posts = db.posts.bySiteHandle(res.locals.siteHandle)
-  const site = db.sites.byHandle(res.locals.siteHandle)
+  const posts = db.posts.bySiteId(res.locals.siteId)
+  const site = db.sites.byId(res.locals.siteId)
 
   res.render('settings.liquid', {
     user,
@@ -135,7 +135,7 @@ server.get('/signup', (req, res) => {
 })
 
 server.get('/editor/new', (req, res) => {
-  const site = db.sites.byHandle(res.locals.siteHandle)
+  const site = db.sites.byId(res.locals.siteId)
   res.render('editor.liquid', {
     post: { id: 'new', title: '', content: '' },
     site
@@ -144,11 +144,37 @@ server.get('/editor/new', (req, res) => {
 
 server.get('/editor/:id', (req, res) => {
   const post = db.posts.byId(req.params.id)
-  const site = db.sites.byHandle(res.locals.siteHandle)
+  const site = db.sites.byId(res.locals.siteId)
   res.render('editor.liquid', {
     post,
     site
   })
+})
+
+server.put('/api/settings', (req, res) => {
+
+  const [ userUpdates, userUpdatesE ] = safe(db.users.update, {
+    id: res.locals.userId,
+    name: req.body.name,
+    email: req.body.email,
+    avatar: req.body.avatar
+  })
+
+  if (userUpdatesE)
+    return respond(res, 400, userUpdatesE.message)
+
+  const [ siteUpdates, siteUpdatesE ] = safe(db.sites.update, {
+    id: res.locals.siteId,
+    name: req.body.title,
+    description: req.body.description,
+    favicon: req.body.favicon,
+    timezone: req.body.timezone
+  })
+
+  if (siteUpdatesE)
+    return respond(res, 400, siteUpdatesE.message)
+
+  respond(res, 200)
 })
 
 server.get('/api/posts/:id', (req, res) => {
@@ -161,7 +187,7 @@ server.get('/api/posts/:id/content', (req, res) => {
 
 server.delete('/api/posts/:id', async (req, res) => {
 
-  const [ _, deletedE ] = await safeP(domain.deletePost({ id: req.params.id, siteHandle: res.locals.siteHandle, userId: res.locals.userId }))
+  const [ _, deletedE ] = await safeP(domain.deletePost({ id: req.params.id, siteId: res.locals.siteId, userId: res.locals.userId }))
   if (deletedE) {
     return respond(res, 400, deletedE.message)
   }
@@ -171,16 +197,20 @@ server.delete('/api/posts/:id', async (req, res) => {
 
 server.post('/api/posts/:id/unpublish', async (req, res) => {
 
-  const [ _, unpublishedE ] = await safeP(domain.unpublishPost({ id: req.params.id, siteHandle: res.locals.siteHandle }))
+  const [ _, unpublishedE ] = await safeP(domain.unpublishPost({ id: req.params.id, siteId: res.locals.siteId }))
   if (unpublishedE) 
     return respond(res, 400, unpublishedE.message)
 
   respond(res, 200)
 })
 
+server.get('/api/validate-handle/:handle', (req, res) => {
+  respond(res, db.sites.validateHandle(req.params.handle) ? 200 : 400)
+})
+
 server.post('/api/posts/:id/publish', async (req, res) => {
 
-  const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteHandle: res.locals.siteHandle }))
+  const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteId: res.locals.siteId }))
   if (publishedE)
     return respond(res, 400, publishedE.message)
 
@@ -193,7 +223,7 @@ server.post('/api/posts', (req, res) => {
     return respond(res, 400)
 
   const [ saved, savedE ] = safe(db.posts.create, { 
-    siteHandle: res.locals.siteHandle,
+    siteId: res.locals.siteId,
     userId: res.locals.userId,
     title: req.body.title,
     content: req.body.content,
@@ -240,11 +270,11 @@ server.post('/api/login', async (req, res) => {
 
   console.log(password, hashedPassword)
   if (await bcrypt.compare(password, hashedPassword)) {
-    const { handle } = db.sites.defaultByUserId(id)
-    if (!handle) {
+    const { id: siteId } = db.sites.defaultByUserId(id)
+    if (!siteId) {
       res.cookie('auth', await jwtSignP({ userId: id }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     } else {
-      res.cookie('auth', await jwtSignP({ userId: id, siteHandle: handle, sitePermissions: '' }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+      res.cookie('auth', await jwtSignP({ userId: id, siteId, sitePermissions: '' }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     }
     return respond(res, 200)
   }
@@ -317,13 +347,13 @@ server.post('/api/create-site', async (req, res) => {
   })
   */
 
-  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteHandle: site.handle, sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
 
   respond(res, 201, site)
 })
 
 server.get('/api/presigned-upload-url', async (req, res) => {
-  const uploadId = `${res.locals.siteHandle}/${uuid.v4()}.jpg`
+  const uploadId = `${res.locals.siteId}/${uuid.v4()}.jpg`
   const uploadUrl = await s3.getSignedUrlPromise('putObject', { Bucket: process.env.SPACES_UPLOADS_BUCKET, Key: uploadId, ContentType: 'image/jpeg' })
   const staticUrl = `https://${process.env.SPACES_UPLOADS_BUCKET}.${process.env.SPACES_ENDPOINT.replace(process.env.SPACES_REGION, `${process.env.SPACES_REGION}.cdn`)}/${uploadId}`
   respond(res, 200, [ uploadUrl, staticUrl ])

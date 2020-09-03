@@ -17,35 +17,41 @@
     </nav>
   </sidebar>
 
-  <div class="flex-1 p-6 border-l border-r max-w-lg">
+  <div class="flex-1 p-6 border-l border-r max-w-lg" x-data="state()">
+
+    <div class="alert" x-bind:class="{ 'open': alert.open }">
+      <div x-show="alert.title" class="alert-title" x-text="alert.title"></div>
+      <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
+    </div>
+
     <h2 class="border-b pb-4 font-medium text-lg">User settings</h1>
-    <form x-on:submit="saveUser()" class="space-y-4">
+    <form x-on:submit.prevent="save()" class="space-y-4">
+      <button class="button">Save</button>
       <div>
         <label class="field-label" for="name">Name</label>
-        <input class="field-input" id="name" type="text">
+        <input class="field-input" x-model="name" type="text">
       </div>
       <div>
         <label class="field-label" for="email">Email</label>
-        <input class="field-input" id="email" type="email">
+        <input class="field-input" x-model="email" type="email">
       </div>
       <div>
         <label class="field-label" for="picture">Profile Picture</label>
-        <input class="field-input" id="picture" type="file">
+        <img x-bind:src="avatar">
+        <input class="field-input" type="file" x-on:change="uploadAvatar">
       </div>
-    </form>
-    <h2 class="border-b mt-8 pb-4 font-medium text-lg">Blog settings</h1>
-    <form x-on:submit="saveBlog()" class="space-y-4">
+      <h2 class="border-b mt-8 pb-4 font-medium text-lg">Blog settings</h1>
       <div>
         <label class="field-label" for="title">Title</label>
-        <input class="field-input" id="title" type="text">
+        <input class="field-input" x-model="title" type="text">
       </div>
       <div>
         <label class="field-label" for="description">Description</label>
-        <input class="field-input" id="description" type="text">
+        <input class="field-input" x-model="description" type="text">
       </div>
       <div>
         <label class="field-label" for="timezone-offset">Time Zone</label>
-        <select class="field-select" id="timezone-offset">
+        <select class="field-select" x-model="timezone">
           <option value="-12:00">(GMT -12:00) Eniwetok, Kwajalein</option>
           <option value="-11:00">(GMT -11:00) Midway Island, Samoa</option>
           <option value="-10:00">(GMT -10:00) Hawaii</option>
@@ -61,7 +67,7 @@
           <option value="-03:00">(GMT -3:00) Brazil, Buenos Aires, Georgetown</option>
           <option value="-02:00">(GMT -2:00) Mid-Atlantic</option>
           <option value="-01:00">(GMT -1:00) Azores, Cape Verde Islands</option>
-          <option value="+00:00" selected="selected">(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
+          <option value="+00:00">(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
           <option value="+01:00">(GMT +1:00) Brussels, Copenhagen, Madrid, Paris</option>
           <option value="+02:00">(GMT +2:00) Kaliningrad, South Africa</option>
           <option value="+03:00">(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg</option>
@@ -90,11 +96,13 @@
       </div>
       <div>
         <label class="field-label" for="favicon">Favicon</label>
-        <input class="field-input" id="favicon" type="file">
+        <img x-bind:src="favicon">
+        <input class="field-input" type="file" x-on:change="uploadFavicon">
       </div>
       <div>
-        <label class="field-label" for="subdomain">Subdomain</label>
-        <input class="field-input" id="subdomain" type="text" disabled>
+        <label class="field-label" for="handle">Subdomain</label>
+        <input class="field-input" x-model="handle" type="text" disabled>
+        <!--<div x-show="handleError">Handle is not valid. Please try another one.</div>-->
       </div>
       <div class="w-48">
         <button class="button">Update billing</button>
@@ -112,19 +120,109 @@
   function state() {
 
     const api = {
-      firstPost: {% if posts.length > 0 %}{{ posts | first | json }}{% else %}null{% endif %},
-      preview: '',
-      selectedId: null,
-      create() {
-        window.location.href = `/editor/new`
+
+      alert: { title: '', content: '' },
+      uploadingImage: false,
+
+      name: `{{ user.name }}`,
+      email: '{{ user.email }}',
+      avatar: '{{ user.avatar }}',
+      title: `{{ site.name }}`,
+      description: `{{ site.description }}`,
+      favicon: '{{ site.favicon }}',
+      timezone: '{{ site.timezone }}',
+      handle: '{{ site.handle }}',
+      //handleError: false,
+
+      /*
+      isHandleValid() {
+        return fetch(`/api/validate-handle/${this.handle}`).then(resp => resp.status === 200)
       },
-      edit() {
-        window.location.href = `/editor/${api.selectedId}`
+      */
+
+      async save() {
+
+        if (this.uploadingImage) 
+          return
+
+        /*
+        if (!await this.isHandleValid()) {
+          return this.handleError = true
+        } else {
+          this.handleError = false
+        }
+        */
+        
+        return fetch(`/api/settings`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: this.name,
+            email: this.email,
+            avatar: this.avatar,
+            title: this.title,
+            description: this.description,
+            favicon: this.favicon,
+            timezone: this.timezone,
+            handle: this.handle
+          })
+        }).then(() => {
+          this.setAlert('Settings saved!')
+        })
       },
-      async selectPost(id) {
-        this.selectedId = id
-        const content = await fetch(`/api/posts/${id}/content`).then(resp => resp.json()).then(json => json.data)
-        this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: { codeSyntaxHighlighting: true } } }, content)
+
+      setAlert(title, content, timeout=3000) {
+        this.alert = { title, content, open: true }
+        setTimeout(() => this.alert = { title, content }, timeout)
+      },
+
+      async uploadImage(file) {
+        this.uploadingImage = true
+        const { data, errors } = await fetch('/api/presigned-upload-url').then(resp => resp.json())
+        if (data) {
+          const [ uploadUrl, hostingUrl ] = data
+          const headers = new Headers({
+            'Content-Type': file.type,
+            'x-amz-acl': 'public-read'
+          })
+          await fetch(uploadUrl, {
+            method: 'PUT',
+            headers,
+            body: file
+          })
+          this.uploadingImage = false
+          return hostingUrl
+        }
+      },
+
+      async uploadAvatar(e) {
+        const url = await this.uploadImage(e.target.files[0])
+        this.avatar = url
+      },
+
+      async uploadFavicon(e) {
+
+        const file = e.target.files[0]
+        if (file.type !== 'image/png')
+          return alert('Please use an .png file with width/height of 32px/32px')
+
+        const fr = new FileReader;
+        fr.onload = () => { // file is loaded
+          const img = new Image;
+          img.onload = async () => {
+            if (img.width !== 32 || img.height !== 32) {
+              return alert('Please use an .png file with width/height of 32px/32px')
+            }
+            const url = await this.uploadImage(file)
+            this.favicon = url
+          };
+
+          img.src = fr.result; // is the data URL because called with readAsDataURL
+        };
+
+        fr.readAsDataURL(file);
       }
     }
 
