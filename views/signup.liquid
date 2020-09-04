@@ -51,6 +51,7 @@
             <input x-bind:disabled="isLoading" type="text" x-model="handle" class="border-r-0 rounded-r-none"> 
             <div class="flex items-center justify-center mb-4 px-4 border-2 border-gray-200 text-gray-600 rounded-r">.prosaic.io</div>
           </div>
+          <div x-show="handleError">Subdomain is either not valid or already taken, please try another one.</div>
         </div>
         <!--
         <div class="field mb-3">
@@ -80,7 +81,18 @@
         siteName: '',
         handle: '',
         isLoading: false,
-        submitSite() {
+        handleError: false,
+        isHandleValid() {
+          return fetch(`/api/validate-handle/${this.handle}`).then(resp => resp.status === 200)
+        },
+        async submitSite() {
+
+          if (!await this.isHandleValid()) {
+            return this.handleError = true
+          } else {
+            this.handleError = false
+          }
+
           this.isLoading = true
           const offset = (new Date()).getTimezoneOffset()
           const hours = offset / 60
