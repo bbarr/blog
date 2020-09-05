@@ -105,7 +105,7 @@
         <!--<div x-show="handleError">Handle is not valid. Please try another one.</div>-->
       </div>
       <div class="w-48">
-        <button class="button">Update billing</button>
+        <button @click.prevent="updateBilling()" class="button">Update billing</button>
       </div>
     </form>
   </div>
@@ -176,6 +176,11 @@
       setAlert(title, content, timeout=3000) {
         this.alert = { title, content, open: true }
         setTimeout(() => this.alert = { title, content }, timeout)
+      },
+
+      async updateBilling() {
+        const resp = await fetch('/api/create-update-billing-session').then(resp => resp.json())
+        window.location.href = resp.data
       },
 
       async uploadImage(file) {

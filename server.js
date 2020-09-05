@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { Liquid } = require('liquidjs')
 const AWS = require('aws-sdk')
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
 
 const db = require('./db')
 const permissions = require('./permissions')
@@ -37,9 +38,14 @@ liquid.registerFilter('escapeMarkdown', str => {
 
 server.engine('liquid', liquid.express())
 server.use(express.static(`${__dirname}/assets`))
-server.use(bodyParser.json())
 server.use(cookieParser(process.env.COOKIE_SECRET))
 server.set('view engine', 'liquid');
+
+server.use(bodyParser.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf
+  }
+}))
 
 const respond = (res, status, body) => {
   const payload = status > 199 && status < 400 ? { data: body, error: null } : { data: null, error: body }
@@ -73,11 +79,12 @@ const safeP = p => p.then(
 server.use(async (req, res, next) => {
   try {
     const jwt = req.signedCookies.auth
-    const { userId, siteId, sitePermissions } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
+    const { userId, siteId, sitePermissions, billingPeriodEnd } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
     console.log('auth!', userId, siteId, sitePermissions)
     res.locals.userId = userId
     res.locals.siteId = siteId
-    res.locals.roles = roles
+    res.locals.permissions = sitePermissions
+    res.locals.billingPeriodEnd = billingPeriodEnd
   } catch(e) {}
   next()
 })
@@ -99,6 +106,7 @@ server.get('/dashboard', requireUser, (req, res) => {
   const posts = db.posts.bySiteId(res.locals.siteId)
   const site = db.sites.byId(res.locals.siteId)
 
+  console.log(res.locals)
   console.log(site)
   res.render('dashboard.liquid', {
     posts,
@@ -130,7 +138,9 @@ server.get('/login', (req, res) => {
 server.get('/signup', (req, res) => {
   console.log('signup is user', !!res.locals.userId)
   res.render('signup.liquid', {
-    isUser: !!res.locals.userId
+    isUser: !!res.locals.userId,
+    user: res.locals.userId &&  db.users.byId(res.locals.userId),
+    STRIPE_KEY: process.env.STRIPE_KEY
   })
 })
 
@@ -210,6 +220,11 @@ server.get('/api/validate-handle/:handle', (req, res) => {
 
 server.post('/api/posts/:id/publish', async (req, res) => {
 
+  if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
+    console.log('Tried to deploy but not active paying account', res.locals)
+    return respond(res, 401)
+  }
+
   const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteId: res.locals.siteId }))
   if (publishedE)
     return respond(res, 400, publishedE.message)
@@ -218,6 +233,11 @@ server.post('/api/posts/:id/publish', async (req, res) => {
 })
 
 server.post('/api/posts', (req, res) => {
+
+  if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
+    console.log('Tried to deploy but not active paying account', res.locals)
+    return respond(res, 401)
+  }
   
   if (!res.locals.userId)
     return respond(res, 400)
@@ -302,6 +322,10 @@ server.post('/api/create-user', async (req, res) => {
   respond(res, 201, user)
 })
 
+function unixTimestamp(d=new Date) {
+  return d.getTime() / 1000
+}
+
 server.post('/api/create-site', async (req, res) => {
   if (!res.locals.userId)
     return respond(res, 400)
@@ -309,8 +333,9 @@ server.post('/api/create-site', async (req, res) => {
   const { name, handle, stripeToken } = req.body
 
   const [ site, siteE ] = safe(db.sites.create, { 
+    billingCustomerId: '',
     billingSubscriptionId: '',
-    billingIsActive: 1,
+    billingPeriodEnd: unixTimestamp(),
     permissions: permissions.forOwner(),
     name,
     handle,
@@ -320,36 +345,32 @@ server.post('/api/create-site', async (req, res) => {
   if (siteE) 
     return respond(res, 400, siteE.message)
 
-  /*
-  const [ stripeCustomer, stripeCustomerE ] = await safeP(
-    stripe.customers.create({
-      name,
-      email,
-      source: stripeToken
-    })
-  )
-  if (stripeCustomerE)
-    console.log('error making stripe customer!', stripeCustomerE.message)
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price: process.env.STRIPE_PRICE_ID,
+      quantity: 1,
+    }],
+    client_reference_id: site.id,
+    customer_email: db.users.byId(res.locals.userId).email,
+    mode: 'subscription',
+    success_url: `${process.env.DOMAIN}/dashboard#welcome`,
+    cancel_url: `${process.env.DOMAIN}/signup`
+  });
 
-  const [ stripeSubscription, stripeSubscriptionE ] = await safeP(
-    tripe.subscriptions.create({
-      customer: customer.id,
-      items: [ { price: process.env.STRIPE_BASIC_PLAN_PRICE_ID } ]
-    })
-  )
-  if (stripeSubscriptionE)
-    console.log('error making stripe subscription!', stripeSubscriptionE.message)
+  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
 
-  const [ updatedSite, updatedSiteE ] = safe(db.updateSite, {
-    handle: site.id,
-    billingSubscriptionId: stripeSubscription.id,
-    billingIsActive: stripeSubscription.status === 'active'
+  respond(res, 200, session)
+})
+
+server.get('/api/create-update-billing-session', async (req, res) => {
+  const site = db.sites.byId(res.locals.siteId)
+  console.log('site', site)
+  var session = await stripe.billingPortal.sessions.create({
+    customer: site.billingCustomerId,
+    return_url: `${process.env.DOMAIN}/settings`,
   })
-  */
-
-  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
-
-  respond(res, 201, site)
+  respond(res, 200, session.url)
 })
 
 server.get('/api/presigned-upload-url', async (req, res) => {
@@ -358,5 +379,70 @@ server.get('/api/presigned-upload-url', async (req, res) => {
   const staticUrl = `https://${process.env.SPACES_UPLOADS_BUCKET}.${process.env.SPACES_ENDPOINT.replace(process.env.SPACES_REGION, `${process.env.SPACES_REGION}.cdn`)}/${uploadId}`
   respond(res, 200, [ uploadUrl, staticUrl ])
 })
+
+function addMonths(date, months) {
+    var d = date.getDate();
+    date.setMonth(date.getMonth() + +months);
+    if (date.getDate() != d) {
+      date.setDate(0);
+    }
+    return date;
+}
+
+server.post('/stripe-subscription', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.log('Webhook failed: ', err.message)
+    respond(res, 400)
+  }
+
+  let site;
+
+  switch (event.type) {
+    case 'invoice.paid':
+      const invoice = event.data.object
+      console.log('invoice', invoice)
+      site = db.sites.byBillingCustomerId(invoice.customer)
+      if (site) {
+        db.sites.updateBilling({
+          id: site.id,
+          billing_customer_id: invoice.customer,
+          billing_period_end: invoice.period_end
+        })
+      } else {
+        db.pendingInvoices.add({
+          billing_customer_id: invoice.customer,
+          billing_period_end: invoice.period_end
+        })
+      }
+      break;
+    case 'checkout.session.completed':
+      const session = event.data.object
+      console.log('session', session)
+      site = db.sites.byId(session.client_reference_id)
+      const pending = db.pendingInvoices.get(session.customer)
+      const billingPeriodEnd = pending ? pending.billingPeriodEnd : site.billingPeriodEnd
+      db.sites.updateBilling({
+        id: site.id,
+        billing_customer_id: session.customer,
+        billing_period_end: billingPeriodEnd
+      })
+      break
+    case 'customer.subscription.updated':
+      console.log('subscription changed... we dont care about this yet, wait for invoice.paid or not')
+      
+      break
+    default:
+      return respond(res, 400)
+  }
+
+  respond(res, 200)
+})
+
 
 module.exports = server

@@ -22,7 +22,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "liquidjs": "^9.15.0",
-    "stripe": "^8.88.0",
+    "stripe": "^8.92.0",
     "tailwindcss": "^1.7.3",
     "uuid": "^8.3.0"
   }

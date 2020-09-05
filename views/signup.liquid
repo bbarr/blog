@@ -61,23 +61,28 @@
         -->
         <button class="button mt-3"
           x-bind:disabled="isLoading"
-          x-text="isLoading ? 'Initializing...' : 'Start blogging'"></button>
+          x-text="isLoading ? 'Continuing...' : 'Continue to payment'"></button>
         <p class="text-center text-gray-600 text-xs mt-6">
-        By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+          By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
         </p>
       </form>
     </div>
   </template>
 </div>
 
+  <script src="https://js.stripe.com/v3/"></script>
+
   <script>
+
+    const stripe = Stripe('{{ STRIPE_KEY }}');
 
     function state() {
       return {
         screen: {% if isUser %}'create-site'{% else %}'create-user'{% endif %},
-        email: '',
+        id: {% if user %}'{{ user.id }}'{% else %}''{% endif %},
+        email: {% if user %}'{{ user.email }}'{% else %}''{% endif %},
         password: '',
-        name: '',
+        name: {% if user %}'{{ user.name }}'{% else %}''{% endif %},
         siteName: '',
         handle: '',
         isLoading: false,
@@ -99,25 +104,29 @@
           const minutes = offset % 60
           const op = offset < 0 ? '-' : '+'
           const timezone = `${op}${hours}:${minutes.toString().padEnd(2, '0')}`
-          setTimeout(() => {
-            return fetch('/api/create-site', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ 
-                name: this.siteName, 
-                handle: this.handle,
-                timezone
+          return fetch('/api/create-site', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              name: this.siteName, 
+              handle: this.handle,
+              timezone
+            })
+          })
+          .then(resp => resp.json())
+          .then(({ data: session, error }) => {
+            if (!error) {
+              stripe.redirectToCheckout({
+                sessionId: session.id,
+              }).then(function (result) {
+                if (result.error) {
+                  console.log(result.error.message)
+                }
               })
-            })
-            .then(resp => resp.json())
-            .then(({ data: site, error }) => {
-              if (!error) {
-                window.location.href = '/dashboard'
-              }
-            })
-          }, 1000)
+            }
+          })
         },
         submitAccount() {
           this.isLoading = true

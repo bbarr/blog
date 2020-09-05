@@ -29,7 +29,8 @@ const insertUser = db.prepare('insert into user (name, email, hashed_password) v
 const updateUser = db.prepare('update user set name=@name, email=@email, avatar=@avatar where id=@id')
 
 // site
-const selectSiteById = db.prepare('select id, name, handle, theme_id, description, timezone, favicon from site where id=?')
+const selectSiteById = db.prepare('select id, name, handle, billing_customer_id, billing_period_end, theme_id, description, timezone, favicon from site where id=?')
+const selectSiteByBillingCustomerId = db.prepare('select id, billing_customer_id, billing_period_end from site where billing_customer_id=?')
 const selectDefaultSiteByUserId = db.prepare(`
   select 
     s.id 
@@ -43,15 +44,15 @@ const selectDefaultSiteByUserId = db.prepare(`
   `)
 const insertSite = db.prepare(`
   insert into site
-    (name, handle, billing_subscription_id, billing_is_active) 
+    (name, handle, billing_customer_id, billing_period_end) 
   values 
-    (@name, @handle, @billing_subscription_id, @billing_is_active)
+    (@name, @handle, @billing_customer_id, @billing_period_end)
 `)
 const updateSiteBilling = db.prepare(`
   update site 
      set 
-         billing_subscription_id=@billing_subscription_id, 
-         billing_is_active=@billing_is_active 
+         billing_customer_id=@billing_customer_id,
+         billing_period_end=@billing_period_end 
    where id=@id
 `)
 const updateSite = db.prepare('update site set name=@name, description=@description, favicon=@favicon, timezone=@timezone where id=@id')
@@ -77,6 +78,10 @@ const insertDeploy = db.prepare('insert into deploy (site_id) values (@site_id)'
 const selectNextDeploy = db.prepare('select id, site_id from deploy limit 1')
 const deleteDeploy = db.prepare('delete from deploy where id=?')
 
+const insertPendingInvoice = db.prepare('insert into pending_invoice (billing_customer_id, billing_period_end) values (@billing_customer_id, @billing_period_end)')
+const selectPendingInvoiceByBillingCustomerId = db.prepare('select * from pending_invoice where billing_customer_id=?')
+const deletePendingInvoice = db.prepare('delete from pending_invoice where billing_customer_id=?')
+
 module.exports = {
   users: {
     byEmail(email) {
@@ -94,6 +99,10 @@ module.exports = {
   sites: {
     defaultByUserId: id => camelKeys(selectDefaultSiteByUserId.get(id)),
     byId: id => camelKeys(selectSiteById.get(id)),
+    byBillingCustomerId(id) {
+      const site = selectSiteByBillingCustomerId.get(id)
+      return site && camelKeys(site)
+    },
     create: db.transaction(props => {
       const info = insertSite.run(snakeKeys(props))
       insertPermissions.run(snakeKeys({ userId: props.userId, siteId: props.siteId, list: props.permissions }))
@@ -138,6 +147,17 @@ module.exports = {
         ]
       }
       return []
+    })
+  },
+  pendingInvoices: {
+    add: props => insertPendingInvoice.run(snakeKeys(props)),
+    get: db.transaction(id => {
+      const pi = selectPendingInvoiceByBillingCustomerId.get(id)
+      if (pi) {
+        deletePendingInvoice.run(pi.billing_customer_id)
+        return camelKeys(pi)
+      }
+      return null
     })
   }
 }
