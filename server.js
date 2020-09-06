@@ -453,7 +453,7 @@ server.post('/stripe-subscription', async (req, res) => {
 server.get('/allow-domain', async (req, res) => {
   const { domain } = req.query
   const exists = db.sites.validateDomain(domain)
-  respond(res, site ? 200 : 400)
+  respond(res, exists ? 200 : 400)
 })
 
 
