@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "server",
+      "script": "./boot.server.js"
+    },
+    {
+      "name": "builder",
+      "script": "./boot.builder.js"
+    }
+  ]
+}
