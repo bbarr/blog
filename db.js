@@ -29,7 +29,7 @@ const insertUser = db.prepare('insert into user (name, email, hashed_password) v
 const updateUser = db.prepare('update user set name=@name, email=@email, avatar=@avatar where id=@id')
 
 // site
-const selectSiteById = db.prepare('select id, name, handle, billing_customer_id, billing_period_end, theme_id, description, timezone, favicon from site where id=?')
+const selectSiteById = db.prepare('select id, name, handle, custom_domain, billing_customer_id, billing_period_end, theme_id, description, timezone, favicon from site where id=?')
 const selectSiteByBillingCustomerId = db.prepare('select id, billing_customer_id, billing_period_end from site where billing_customer_id=?')
 const selectDefaultSiteByUserId = db.prepare(`
   select 
@@ -55,8 +55,9 @@ const updateSiteBilling = db.prepare(`
          billing_period_end=@billing_period_end 
    where id=@id
 `)
-const updateSite = db.prepare('update site set name=@name, description=@description, favicon=@favicon, timezone=@timezone where id=@id')
+const updateSite = db.prepare('update site set name=@name, description=@description, favicon=@favicon, timezone=@timezone, custom_domain=@custom_domain where id=@id')
 const validateHandle = db.prepare('select 1 from site where handle=?')
+const validateDomain = db.prepare('select 1 from site where custom_domain=?')
 
 // post
 const selectPostsBySiteId = db.prepare('select id, content, title, created_at, updated_at, published_at, latest_published_at from post where site_id=?')
@@ -117,6 +118,11 @@ module.exports = {
     validateHandle(handle) {
       const existing = validateHandle.get(handle)
       console.log('existing handle', existing, handle)
+      return !existing
+    },
+    validateDomain(domain) {
+      const existing = validateDomain.get(domain)
+      console.log('existing domain', existing, domain)
       return !existing
     }
   },

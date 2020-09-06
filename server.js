@@ -178,7 +178,8 @@ server.put('/api/settings', (req, res) => {
     name: req.body.title,
     description: req.body.description,
     favicon: req.body.favicon,
-    timezone: req.body.timezone
+    timezone: req.body.timezone,
+    customDomain: req.body.customDomain
   })
 
   if (siteUpdatesE)
@@ -217,6 +218,11 @@ server.post('/api/posts/:id/unpublish', async (req, res) => {
 server.get('/api/validate-handle/:handle', (req, res) => {
   respond(res, db.sites.validateHandle(req.params.handle) ? 200 : 400)
 })
+
+server.get('/api/validate-domain', (req, res) => {
+  respond(res, db.sites.validateDomain(req.query.domain) ? 200 : 400)
+})
+
 
 server.post('/api/posts/:id/publish', async (req, res) => {
 

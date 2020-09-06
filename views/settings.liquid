@@ -26,7 +26,6 @@
 
     <h2 class="border-b pb-4 font-medium text-lg">User settings</h1>
     <form x-on:submit.prevent="save()" class="space-y-4">
-      <button class="button">Save</button>
       <div>
         <label class="field-label" for="name">Name</label>
         <input class="field-input" x-model="name" type="text">
@@ -100,12 +99,20 @@
         <input class="field-input" type="file" x-on:change="uploadFavicon">
       </div>
       <div>
-        <label class="field-label" for="handle">Subdomain</label>
+        <label class="field-label" for="handle">Subdomain (cannot be changed)</label>
         <input class="field-input" x-model="handle" type="text" disabled>
-        <!--<div x-show="handleError">Handle is not valid. Please try another one.</div>-->
+        <!--
+        <div x-show="handleError">Subdomain is not valid. Please try another one.</div>
+      -->
       </div>
-      <div class="w-48">
-        <button @click.prevent="updateBilling()" class="button">Update billing</button>
+      <div>
+        <label class="field-label" for="handle">Custom domain</label>
+        <input class="field-input" x-model="domain" type="text">
+        <div x-show="domainError">Domain is not valid. Please try another one.</div>
+      </div>
+      <div class="flex items-center justify-between">
+        <button class="button flex-1 mr-2">Save</button>
+        <button @click.prevent="updateBilling()" class="button flex-1 bg-transparent text-black hover:bg-transparent">Update billing</button>
       </div>
     </form>
   </div>
@@ -118,6 +125,8 @@
 <link rel="stylesheet" href="/previews/{{ site.themeId }}/index.css">
 <script>
   function state() {
+
+    const originalCustomDomain = '{{ site.customDomain }}'
 
     const api = {
 
@@ -132,13 +141,19 @@
       favicon: '{{ site.favicon }}',
       timezone: '{{ site.timezone }}',
       handle: '{{ site.handle }}',
+      domain: '{{ site.customDomain }}',
       //handleError: false,
+      domainError: false,
 
       /*
       isHandleValid() {
         return fetch(`/api/validate-handle/${this.handle}`).then(resp => resp.status === 200)
       },
       */
+
+      isDomainValid() {
+        return fetch(`/api/validate-domain?domain=${encodeURI(this.domain)}`).then(resp => resp.status === 200)
+      },
 
       async save() {
 
@@ -152,6 +167,14 @@
           this.handleError = false
         }
         */
+
+        const hasNewCustomDomain = originalCustomDomain !== this.domain
+
+        if (hasNewCustomDomain && !await this.isDomainValid()) {
+          return this.domainError = true
+        } else {
+          this.domainError = false
+        }
         
         return fetch(`/api/settings`, {
           method: 'PUT',
@@ -166,7 +189,8 @@
             description: this.description,
             favicon: this.favicon,
             timezone: this.timezone,
-            handle: this.handle
+            handle: this.handle,
+            customDomain: hasNewCustomDomain ? this.domain : null
           })
         }).then(() => {
           this.setAlert('Settings saved!')
