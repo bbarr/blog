@@ -450,5 +450,11 @@ server.post('/stripe-subscription', async (req, res) => {
   respond(res, 200)
 })
 
+server.get('/allow-domain', async (req, res) => {
+  const { domain } = req.query
+  const site = db.sites.byCustomDomain(domain)
+  respond(res, site ? 200 : 400)
+})
+
 
 module.exports = server
