@@ -15,7 +15,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET)
 
 const db = require('./db')
 const permissions = require('./permissions')
-const domain = require('./domain')
 
 const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
@@ -197,21 +196,19 @@ server.get('/api/posts/:id/content', (req, res) => {
 })
 
 server.delete('/api/posts/:id', async (req, res) => {
-
-  const [ _, deletedE ] = await safeP(domain.deletePost({ id: req.params.id, siteId: res.locals.siteId, userId: res.locals.userId }))
-  if (deletedE) {
-    return respond(res, 400, deletedE.message)
-  }
-
+  db.posts.delete({ id, userId })
+  db.deploys.push({ siteId: res.locals.siteId })
   respond(res, 200)
 })
 
 server.post('/api/posts/:id/unpublish', async (req, res) => {
 
-  const [ _, unpublishedE ] = await safeP(domain.unpublishPost({ id: req.params.id, siteId: res.locals.siteId }))
-  if (unpublishedE) 
-    return respond(res, 400, unpublishedE.message)
+  const post = db.posts.byId(req.params.id)
 
+  if (post && post.siteId === res.locals.siteId) {
+    db.posts.markAsUnpublished(post)
+    db.deploys.push({ siteId: res.locals.siteId })
+  }
   respond(res, 200)
 })
 
@@ -223,7 +220,6 @@ server.get('/api/validate-domain', (req, res) => {
   respond(res, db.sites.validateDomain(req.query.domain) ? 200 : 400)
 })
 
-
 server.post('/api/posts/:id/publish', async (req, res) => {
 
   if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
@@ -231,11 +227,12 @@ server.post('/api/posts/:id/publish', async (req, res) => {
     return respond(res, 401)
   }
 
-	console.log('publishing post', req.params.id)
-  const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteId: res.locals.siteId }))
-	console.log(_, publishedE)
-  if (publishedE)
-    return respond(res, 400, publishedE.message)
+  const post = db.posts.byId(req.params.id)
+
+  if (post && post.siteId === res.locals.siteId) {
+    db.posts.markAsPublished(post)
+    db.deploys.push({ siteId: res.locals.siteId })
+  }
 
   respond(res, 200)
 })
@@ -377,7 +374,7 @@ server.post('/api/create-site', async (req, res) => {
 		success_url: `${process.env.DOMAIN}/dashboard#welcome`,
 		cancel_url: `${process.env.DOMAIN}/signup`
 	}
-	if (handle === 'bbarr') sessionData.subscription_data = { coupon: '3x5LLtG3' }
+	if (process.env.NODE_ENV === 'production' && (handle === 'bbarr')) sessionData.subscription_data = { coupon: '3x5LLtG3' }
   const session = await stripe.checkout.sessions.create(sessionData);
 
   res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })

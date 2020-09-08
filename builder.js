@@ -1,6 +1,7 @@
 
 const util = require('util');
 const cp = require('child_process')
+const { Liquid } = require('liquidjs')
 
 const uuid = require('uuid').v4
 
@@ -26,7 +27,31 @@ async function main() {
   const { siteId } = deploy
 
   try { 
-    await execP(`npx @11ty/eleventy --input=${process.env.SITES_DIR}/${site.handle} --output=${process.env.SITES_DIR}/${site.handle}/_site`)
+
+    const themeDir = `${process.env.THEMES_DIR}/${site.themeId || 'base'}`
+
+    const engine = new Liquid({
+      root: themeDir
+    })
+
+    const PER_PAGE = 2
+
+    async function renderIndexPage(page) {
+      const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
+      console.log('ok!', posts, hasMore)
+      await engine.renderFile('index.liquid', { posts }).then(output => console.log(output))
+      return hasMore && renderIndexPage(page + 1)
+    }
+
+    // render index pages
+    await renderIndexPage(0)
+    
+    // render feed
+    
+    // render about page
+
+    // render posts
+
     smallWait()
   } catch(e) {
     console.log('Deploy failed', e.message)

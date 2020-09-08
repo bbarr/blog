@@ -64,6 +64,23 @@ const selectPostsBySiteId = db.prepare('select id, content, title, published_tit
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
 const selectPostByIdLite = db.prepare('select title, published_title, published_at, latest_published_at from post where id=?')
+const selectPostPage = db.prepare(`
+  select * 
+    from post 
+   where 
+         site_id=@site_id 
+     and published_at is not null
+     and id not in (
+         select id 
+           from post 
+          where site_id=@site_id
+            and published_at is not null
+       order by id asc 
+          limit @offset
+     )
+order by id asc 
+   limit @limit
+`)
 const updatePost = db.prepare('update post set updated_at=current_timestamp, title=@title, content=@content where id=@id and user_id=@user_id')
 const updatePostPublishedTitle = db.prepare('update post set published_title=@title where id=@id')
 const updatePostToPublished = db.prepare('update post set published_at=current_timestamp, latest_published_at=current_timestamp where id=?')
@@ -131,16 +148,30 @@ module.exports = {
     bySiteId: siteId => selectPostsBySiteId.all(siteId).map(camelKeys),
     byId: id => camelKeys(selectPostById.get(id)),
     byIdLite: id => camelKeys(selectPostByIdLite.get(id)),
+    getPage: props => {
+
+      // add one
+      props.limit++
+
+      let page = camelKeys(selectPostPage.all(snakeKeys(props)))
+
+      // remove one
+      props.limit--
+
+      const extra = !!page[props.limit]
+      delete page[props.limit]
+      return [ page, extra ]
+    },
     contentById: id => camelKeys(selectPostContentById.get(id)),
     update: props => updatePost.run(snakeKeys(props)),
     create: props => insertPost.run(snakeKeys(props)),
     delete: props => deletePostById.run(snakeKeys(props)),
     markAsPublished: db.transaction(post => {
       if (!post.publishedTitle)
-	updatePostPublishedTitle.run({ id: post.id, title: post.title })
+        updatePostPublishedTitle.run({ id: post.id, title: post.title })
       return post.publishedAt ? 
-	updatePostToPublishedAgain.run(post.id) : 
-	updatePostToPublished.run(post.id)
+        updatePostToPublishedAgain.run(post.id) : 
+        updatePostToPublished.run(post.id)
     }),
     markAsUnpublished: post => updatePostToUnpublished.run(post.id)
   },
