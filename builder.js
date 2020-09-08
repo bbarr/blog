@@ -67,7 +67,8 @@ async function main() {
 
       for (const post of posts) {
         await engine.renderFile('post.liquid', {
-          post
+          post,
+          site
         }).then(async (output) => {
           await writeP(`${siteDir}/posts/${sluggify(post.publishedTitle)}.html`, output)
         })
