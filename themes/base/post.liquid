@@ -16,65 +16,9 @@
     </style>
   </head>
   <body class="home-template">
-
-    <header class="main-header no-cover">
-      <nav class="main-nav overlay clearfix">
-        <a class="subscribe-button" href="/feed.xml ">Subscribe</a>
-      </nav>
-      <div class="vertical">
-        <div class="main-header-content inner">
-          <h1 class="page-title">{{ site.name }}</h1>
-          <h2 class="page-description">
-            {{ site.description }}
-            <!--<a href='/kasper/about.html'>About me </a>-->
-          </h2>
-        </div>
-      </div>
-    </header>
-    <main id="content" class="content" role="main">
-
-      {% for post in posts %}
-      <article class="post">
-        <header class="post-header">
-          <h2 class="post-title"><a href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h2>
-        </header>
-        <section class="post-excerpt">
-          <p>{{ post.content | truncate: 100 }}</p>
-
-          {% if post.content.size > 100 %}
-            <a class="read-more" href="url">&raquo;</a>
-          {% endif %}
-        </section>
-
-        <footer class="post-meta">
-
-          {% if post.userAvatar %}<img class="author-thumb" src="{{ post.userAvatar }}" alt="{{ post.userName }} profile image" nopin="nopin" />{% endif %}
-          {{ post.userName }}
-          <time class="post-date" datetime="2013-11-10">
-            {{ post.publishedAt | date: '%m/%d/%Y' }}
-          </time>
-        </footer>
-      </article>
-      {% endfor %}
-
-
-
-      <nav class="pagination" role="pagination">
-        {% if prevPage %}
-          <div>
-            <a href="{% if prevPage == 0 %}/{% else %}/pages/{{ prevPage}}.html{% endif %}">Previous page</a>
-          </div>
-        {% endif %}
-        {% if nextPage %}
-          <div>
-            <a href="/pages/{{ nextPage}}.html">Next page</a>
-          </div>
-        {% endif %}
-      </nav>
-
-    </main>
-
-    <footer class="site-footer clearfix">
-    </footer>
+    <h1>{{ post.title }}</h1>
+    <div>
+      {{ post.content | markdown }}
+    </div>
   </body>
 </html>

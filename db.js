@@ -65,20 +65,23 @@ const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
 const selectPostByIdLite = db.prepare('select title, published_title, published_at, latest_published_at from post where id=?')
 const selectPostPage = db.prepare(`
-  select * 
-    from post 
+  select p.title, p.published_title, p.published_at, p.content, u.avatar as user_avatar, u.name as user_name
+    from post p, user u
    where 
-         site_id=@site_id 
+         p.site_id=@site_id 
+     and p.user_id=u.id
      and published_at is not null
-     and id not in (
-         select id 
-           from post 
-          where site_id=@site_id
+     and p.id not in (
+         select p.id 
+           from post p, user u
+          where 
+                p.site_id=@site_id
+            and p.user_id=u.id
             and published_at is not null
-       order by id asc 
+       order by p.id asc 
           limit @offset
      )
-order by id asc 
+order by p.id asc 
    limit @limit
 `)
 const updatePost = db.prepare('update post set updated_at=current_timestamp, title=@title, content=@content where id=@id and user_id=@user_id')
@@ -153,14 +156,13 @@ module.exports = {
       // add one
       props.limit++
 
-      let page = camelKeys(selectPostPage.all(snakeKeys(props)))
+      let page = selectPostPage.all(snakeKeys(props)).map(camelKeys)
 
       // remove one
       props.limit--
 
       const extra = !!page[props.limit]
-      delete page[props.limit]
-      return [ page, extra ]
+      return [ page.slice(0, props.limit), extra ]
     },
     contentById: id => camelKeys(selectPostContentById.get(id)),
     update: props => updatePost.run(snakeKeys(props)),
