@@ -79,11 +79,11 @@ const safeP = p => p.then(
 server.use(async (req, res, next) => {
   try {
     const jwt = req.signedCookies.auth
-    const { userId, siteId, sitePermissions, billingPeriodEnd } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
-    console.log('auth!', userId, siteId, sitePermissions)
+    const { userId, siteId, permissions, billingPeriodEnd } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
+    console.log('auth!', userId, siteId, permissions)
     res.locals.userId = userId
     res.locals.siteId = siteId
-    res.locals.permissions = sitePermissions
+    res.locals.permissions = permissions
     res.locals.billingPeriodEnd = billingPeriodEnd
   } catch(e) {}
   next()
@@ -227,27 +227,41 @@ server.get('/api/validate-domain', (req, res) => {
 server.post('/api/posts/:id/publish', async (req, res) => {
 
   if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
-    console.log('Tried to deploy but not active paying account', res.locals)
+    console.log('Tried to deploy (publish) but not active paying account', res.locals)
     return respond(res, 401)
   }
 
+	console.log('publishing post', req.params.id)
   const [ _, publishedE ] = await safeP(domain.publishPost({ id: req.params.id, siteId: res.locals.siteId }))
+	console.log(_, publishedE)
   if (publishedE)
     return respond(res, 400, publishedE.message)
 
   respond(res, 200)
 })
 
-server.post('/api/posts', (req, res) => {
+server.post('/api/posts', async (req, res) => {
 
-  if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
-    console.log('Tried to deploy but not active paying account', res.locals)
-    return respond(res, 401)
-  }
-  
   if (!res.locals.userId)
     return respond(res, 400)
 
+  if (!res.locals.billingPeriodEnd || res.locals.billingPeriodEnd < unixTimestamp()) {
+    console.log('Tried to deploy but not active paying account', res.locals)
+    const site = db.sites.byId(res.locals.siteId)
+	  console.log('fetched site!', site.billingPeriodEnd, unixTimestamp())
+    if (site.billingPeriodEnd < unixTimestamp()) {
+    	return respond(res, 401)
+    }
+	  console.log('writing cookie')
+	  const token = await jwtSignP({ 
+		  userId: res.locals.userId, 
+		  siteId: res.locals.siteId, 
+		  billingPeriodEnd: site.billingPeriodEnd, 
+		  permissions: res.locals.permissions 
+	  }, process.env.JWT_SECRET)
+    res.cookie('auth', token, { httpOnly: true, signed: true })
+  }
+  
   const [ saved, savedE ] = safe(db.posts.create, { 
     siteId: res.locals.siteId,
     userId: res.locals.userId,
@@ -300,7 +314,7 @@ server.post('/api/login', async (req, res) => {
     if (!siteId) {
       res.cookie('auth', await jwtSignP({ userId: id }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     } else {
-      res.cookie('auth', await jwtSignP({ userId: id, siteId, sitePermissions: '' }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+      res.cookie('auth', await jwtSignP({ userId: id, siteId, permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     }
     return respond(res, 200)
   }
@@ -351,20 +365,22 @@ server.post('/api/create-site', async (req, res) => {
   if (siteE) 
     return respond(res, 400, siteE.message)
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [{
-      price: process.env.STRIPE_PRICE_ID,
-      quantity: 1,
-    }],
-    client_reference_id: site.id,
-    customer_email: db.users.byId(res.locals.userId).email,
-    mode: 'subscription',
-    success_url: `${process.env.DOMAIN}/dashboard#welcome`,
-    cancel_url: `${process.env.DOMAIN}/signup`
-  });
+	const sessionData = {
+		payment_method_types: ['card'],
+		line_items: [{
+			price: process.env.STRIPE_PRICE_ID,
+			quantity: 1,
+		}],
+		client_reference_id: site.id,
+		customer_email: db.users.byId(res.locals.userId).email,
+		mode: 'subscription',
+		success_url: `${process.env.DOMAIN}/dashboard#welcome`,
+		cancel_url: `${process.env.DOMAIN}/signup`
+	}
+	if (handle === 'bbarr') sessionData.subscription_data = { coupon: '3x5LLtG3' }
+  const session = await stripe.checkout.sessions.create(sessionData);
 
-  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), sitePermissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+  res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
 
   respond(res, 200, session)
 })
@@ -417,13 +433,13 @@ server.post('/stripe-subscription', async (req, res) => {
       if (site) {
         db.sites.updateBilling({
           id: site.id,
-          billing_customer_id: invoice.customer,
-          billing_period_end: invoice.period_end
+          billingCustomerId: invoice.customer,
+          billingPeriodEnd: invoice.lines.data[0].period.end
         })
       } else {
         db.pendingInvoices.add({
-          billing_customer_id: invoice.customer,
-          billing_period_end: invoice.period_end
+          billingCustomerId: invoice.customer,
+          billingPeriodEnd: invoice.lines.data[0].period.end
         })
       }
       break;
@@ -433,10 +449,11 @@ server.post('/stripe-subscription', async (req, res) => {
       site = db.sites.byId(session.client_reference_id)
       const pending = db.pendingInvoices.get(session.customer)
       const billingPeriodEnd = pending ? pending.billingPeriodEnd : site.billingPeriodEnd
+		  console.log('new billing period end!', billingPeriodEnd)
       db.sites.updateBilling({
         id: site.id,
-        billing_customer_id: session.customer,
-        billing_period_end: billingPeriodEnd
+        billingCustomerId: session.customer,
+        billingPeriodEnd: billingPeriodEnd
       })
       break
     case 'customer.subscription.updated':

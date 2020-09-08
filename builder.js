@@ -26,7 +26,7 @@ async function main() {
   const { siteId } = deploy
 
   try { 
-    await execP(`jekyll build --source ${process.env.SITES_DIR}/${site.handle} --destination ${process.env.SITES_DIR}/${site.handle}/_site`)
+    await execP(`npx @11ty/eleventy --input=${process.env.SITES_DIR}/${site.handle} --output=${process.env.SITES_DIR}/${site.handle}/_site`)
     smallWait()
   } catch(e) {
     console.log('Deploy failed', e.message)

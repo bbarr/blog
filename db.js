@@ -60,11 +60,12 @@ const validateHandle = db.prepare('select 1 from site where handle=?')
 const validateDomain = db.prepare('select 1 from site where custom_domain=?')
 
 // post
-const selectPostsBySiteId = db.prepare('select id, content, title, created_at, updated_at, published_at, latest_published_at from post where site_id=?')
+const selectPostsBySiteId = db.prepare('select id, content, title, published_title, created_at, updated_at, published_at, latest_published_at from post where site_id=?')
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
-const selectPostByIdLite = db.prepare('select title, published_at, latest_published_at from post where id=?')
+const selectPostByIdLite = db.prepare('select title, published_title, published_at, latest_published_at from post where id=?')
 const updatePost = db.prepare('update post set updated_at=current_timestamp, title=@title, content=@content where id=@id and user_id=@user_id')
+const updatePostPublishedTitle = db.prepare('update post set published_title=@title where id=@id')
 const updatePostToPublished = db.prepare('update post set published_at=current_timestamp, latest_published_at=current_timestamp where id=?')
 const updatePostToPublishedAgain = db.prepare('update post set latest_published_at=current_timestamp where id=?')
 const updatePostToUnpublished = db.prepare('update post set published_at=null, latest_published_at=null where id=?')
@@ -134,7 +135,13 @@ module.exports = {
     update: props => updatePost.run(snakeKeys(props)),
     create: props => insertPost.run(snakeKeys(props)),
     delete: props => deletePostById.run(snakeKeys(props)),
-    markAsPublished: post => post.publishedAt ? updatePostToPublishedAgain.run(post.id) : updatePostToPublished.run(post.id),
+    markAsPublished: db.transaction(post => {
+      if (!post.publishedTitle)
+	updatePostPublishedTitle.run({ id: post.id, title: post.title })
+      return post.publishedAt ? 
+	updatePostToPublishedAgain.run(post.id) : 
+	updatePostToPublished.run(post.id)
+    }),
     markAsUnpublished: post => updatePostToUnpublished.run(post.id)
   },
   deploys: {
@@ -148,8 +155,8 @@ module.exports = {
         const post = selectPostById.get(deploy.postId)
         return [
           deploy,
-          site,
-          post
+          site ? camelKeys(site) : site,
+          post ? camelKeys(post) : post
         ]
       }
       return []
