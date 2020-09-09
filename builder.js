@@ -13,6 +13,7 @@ const SMALL_DELAY = 1000
 const BIG_DELAY = SMALL_DELAY * 5 
 
 const writeP = util.promisify(fs.writeFile)
+const readP = util.promisify(fs.readFile)
 const execP = util.promisify(cp.exec.bind(cp))
 
 let timeoutId
@@ -55,9 +56,12 @@ async function main() {
 
       const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
 
+      const css = await readP(`${themeDir}/style.css`, 'utf8')
+
       await engine.renderFile('index.liquid', { 
         site, 
         posts, 
+        css,
         nextPage: hasMore && page + 2, 
         prevPage: page > 0 && page - 1 
       }).then(output => {
@@ -68,7 +72,8 @@ async function main() {
       for (const post of posts) {
         await engine.renderFile('post.liquid', {
           post,
-          site
+          site,
+          css
         }).then(async (output) => {
           await writeP(`${siteDir}/posts/${sluggify(post.publishedTitle)}.html`, output)
         })
