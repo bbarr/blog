@@ -22,7 +22,7 @@ async function main() {
   clearTimeout(timeoutId)
     
   console.log('builder checking...')
-  const [ deploy, site, post ] = db.deploys.pull()
+  const [ deploy, site ] = db.deploys.pull()
 
   if (!deploy) return bigWait()
 
@@ -32,7 +32,7 @@ async function main() {
 
   try { 
 
-    const siteDir = `${process.env.SITES_DIR}/${site.handle}`
+    const siteDir = `${process.env.SITES_DIR}/${site.handle}.${process.env.HOSTNAME}`
     const themeDir = `${process.env.THEMES_DIR}/${site.themeId || 'base'}`
 
     await execP(`rm -rf ${siteDir}`)
@@ -90,6 +90,9 @@ async function main() {
     // render about page
 
     // render posts
+
+    if (site.customDomain)
+      await execP(`ln -s ${siteDir}/ ${process.env.SITES_DIR}/${site.customDomain}`)
 
     smallWait()
   } catch(e) {

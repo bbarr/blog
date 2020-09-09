@@ -35,7 +35,18 @@ liquid.registerFilter('escapeMarkdown', str => {
   return str.replace(/`/g, '\\`')
 })
 
+	/*
+server.use((req, res, next) => {
+	if (req.hostname === process.env.HOSTNAME)
+		return next()
+	console.log('THIS SHOULD NEVER HAPPEN', req.hostname, req.path, process.env.HOSTNAME)
+	req.url = `/${req.hostname}${req.path}`
+	next()
+})
+*/
+
 server.engine('liquid', liquid.express())
+//server.use(express.static(`${process.env.SITES_DIR}`))
 server.use(express.static(`${__dirname}/assets`))
 server.use(cookieParser(process.env.COOKIE_SECRET))
 server.set('view engine', 'liquid');
@@ -196,7 +207,7 @@ server.get('/api/posts/:id/content', (req, res) => {
 })
 
 server.delete('/api/posts/:id', async (req, res) => {
-  db.posts.delete({ id, userId })
+  db.posts.delete({ id: req.params.id, userId: res.locals.userId })
   db.deploys.push({ siteId: res.locals.siteId })
   respond(res, 200)
 })
@@ -466,8 +477,11 @@ server.post('/stripe-subscription', async (req, res) => {
 
 server.get('/allow-domain', async (req, res) => {
   const { domain } = req.query
-  const exists = db.sites.validateDomain(domain)
-  respond(res, exists ? 200 : 400)
+  const error = domain === process.env.HOSTNAME ? 
+		false : 
+		(domain.indexOf(process.env.HOSTNAME) > -1 ? db.sites.validateHandle(domain.split('.')[0]) : db.sites.validateDomain(domain))
+  console.log('allow domain?', domain, !error, domain.indexOf(process.env.HOSTNAME))
+  respond(res, !error ? 200 : 400)
 })
 
 
