@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev-css & npm run dev-server & npm run dev-builder",
+    "dev": "npm run dev-css & npm run dev-server & npm run dev-themes & npm run dev-builder & npm run dev-caddy",
+    "dev-caddy": "caddy run -watch",
+    "dev-themes": "nodemon -w themes/ -e 'liquid css' -x sqlite3 main.db 'insert into deploy (site_id) values (1)'",
     "dev-css": "nodemon -w src/ -x npx tailwind build src/base.css -o assets/base.css -c tailwind.config.js",
     "dev-server": "nodemon boot.server.js",
     "dev-builder": "nodemon boot.builder.js",
