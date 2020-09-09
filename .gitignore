@@ -3,8 +3,6 @@ node_modules/
 certs/
 sites/
 .jekyll-cache/
-themes/*/_site/
-themes/*/_posts/
 assets/base.css
 main.db
 Caddyfile

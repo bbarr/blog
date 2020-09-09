@@ -374,7 +374,7 @@ server.post('/api/create-site', async (req, res) => {
 		success_url: `${process.env.DOMAIN}/dashboard#welcome`,
 		cancel_url: `${process.env.DOMAIN}/signup`
 	}
-	if (process.env.NODE_ENV === 'production' && (handle === 'bbarr')) sessionData.subscription_data = { coupon: '3x5LLtG3' }
+	if (process.env.NODE_ENV === 'production' && (handle === 'brendan' || handle === 'nprimsa' || handle === 'john')) sessionData.subscription_data = { coupon: '3x5LLtG3' }
   const session = await stripe.checkout.sessions.create(sessionData);
 
   res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
