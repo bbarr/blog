@@ -1,4 +1,11 @@
 module.exports = {
+  purge: {
+    enabled: true,
+    content: [
+      './themes/**/*.liquid',
+      './views/**/*.liquid'
+    ]
+  },
   theme: {
     extend: {
       colors: {
