@@ -3,6 +3,8 @@ const util = require('util');
 const cp = require('child_process')
 const fs = require('fs')
 const { Liquid } = require('liquidjs')
+const sass = require('node-sass')
+
 const marked = require('marked')
 
 const uuid = require('uuid').v4
@@ -12,6 +14,7 @@ const db = require('./db')
 const SMALL_DELAY = 1000
 const BIG_DELAY = SMALL_DELAY * 5 
 
+const renderSassP = util.promisify(sass.render)
 const writeP = util.promisify(fs.writeFile)
 const readP = util.promisify(fs.readFile)
 const execP = util.promisify(cp.exec.bind(cp))
@@ -56,7 +59,8 @@ async function main() {
 
       const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
 
-      const css = await readP(`${themeDir}/style.css`, 'utf8')
+      const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/' ] })
+      const css = rendered.css.toString()
 
       await engine.renderFile('index.liquid', { 
         site, 
@@ -90,7 +94,7 @@ async function main() {
     // render about page
 
     // render posts
-
+  
     if (site.customDomain)
       await execP(`ln -s ${siteDir}/ ${process.env.SITES_DIR}/${site.customDomain}`)
 
