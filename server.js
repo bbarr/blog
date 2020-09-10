@@ -313,8 +313,9 @@ server.post('/api/login', async (req, res) => {
 
   const { email, password } = req.body
 
-  const { id, hashed_password: hashedPassword } = db.users.byEmail(email)
-  if (!id) return res.sendStatus(404) 
+  const user = db.users.byEmail(email)
+  const { id, hashed_password: hashedPassword } = user || {}
+  if (!id) return respond(res, 400) 
 
   if (await bcrypt.compare(password, hashedPassword)) {
     const { siteId, permissions, billingPeriodEnd } = db.sites.defaultByUserId(id)
@@ -327,7 +328,7 @@ server.post('/api/login', async (req, res) => {
     return respond(res, 200)
   }
 
-  return respond(res, 404)
+  return respond(res, 400)
 })
 
 server.post('/api/create-user', async (req, res) => {

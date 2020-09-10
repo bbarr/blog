@@ -2,37 +2,69 @@
 {% layout "layout.liquid" %}
 
 {% block content %}
-  <a href="/signup">Signup</a>
-  <div x-data="{ email: '', password: '' }">
-    <form x-on:submit.prevent="submit({ email: email, password: password })">
-      <div>
-        <label>Email</label>
-        <input type="email" x-model="email"> 
+
+<div x-data="state()" class="modal-container">
+  <div class="modal">
+    <div class="modal-header text-center">
+      <h2 class="text-4xl mb-2">Log in</h2>
+      <p class="text-gray-600">Don't have an account yet? <a href="/signup">Sign up</a></p>
+    </div>
+    <form class="modal-body" x-on:submit.prevent="login()">
+      <div x-text="error" x-show="error" class="text-red-500 bg-white p-6 mb-5"></div>
+      <div class="field">
+        <label>Email address</label>
+        <input x-bind:disabled="isLoading" type="email" x-model="email"> 
       </div>
-      <div>
+      <div class="field">
         <label>Password</label>
-        <input type="password" x-model="password"> 
+        <input x-bind:disabled="isLoading" type="password" x-model="password"> 
       </div>
-      <button>Log in</button>
+      <button 
+        class="button mt-3" 
+        x-bind:disabled="isLoading"
+        x-text="isLoading ? 'Logging in...' : 'Log in'">
+      </button>
     </form>
   </div>
+</div>
 
   <script>
-    function submit(model) {
-      return fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(model)
-      })
-        .then(resp => resp.json())
-        .then(({ data, error }) => {
-          if (error) {
-          } else {
-            window.location.href = '/dashboard'
-          }
-        })
+
+    function state() {
+      return {
+        email: '',
+        password: '',
+        isLoading: false,
+        error: null,
+        login() {
+          this.isLoading = true
+          setTimeout(() => {
+            return fetch('/api/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ 
+                email: this.email, 
+                password: this.password
+              })
+            })
+            .then(resp => {
+              if (!resp.ok) {
+                this.isLoading = false
+                this.error = 'Something went wrong, please check your username and password and try again.'
+              } else {
+                window.location.href = '/dashboard'
+              }
+            })
+            .catch(() => {
+              this.isLoading = false
+              this.error = 'Something went wrong, please check your username and password and try again.'
+            })
+          }, 1000)
+        }
+      }
     }
+
   </script>
 {% endblock %}
