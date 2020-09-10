@@ -90,7 +90,7 @@ server.use(async (req, res, next) => {
   try {
     const jwt = req.signedCookies.auth
     const { userId, siteId, permissions, billingPeriodEnd } = await jwtVerifyP(jwt, process.env.JWT_SECRET)
-    console.log('auth!', userId, siteId, permissions)
+    console.log('auth!', userId, siteId, permissions, billingPeriodEnd)
     res.locals.userId = userId
     res.locals.siteId = siteId
     res.locals.permissions = permissions
@@ -316,13 +316,13 @@ server.post('/api/login', async (req, res) => {
   const { id, hashed_password: hashedPassword } = db.users.byEmail(email)
   if (!id) return res.sendStatus(404) 
 
-  console.log(password, hashedPassword)
   if (await bcrypt.compare(password, hashedPassword)) {
-    const { id: siteId } = db.sites.defaultByUserId(id)
+    const { siteId, permissions, billingPeriodEnd } = db.sites.defaultByUserId(id)
+	  console.log(siteId, permissions, billingPeriodEnd)
     if (!siteId) {
       res.cookie('auth', await jwtSignP({ userId: id }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     } else {
-      res.cookie('auth', await jwtSignP({ userId: id, siteId, permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
+      res.cookie('auth', await jwtSignP({ userId: id, siteId, permissions, billingPeriodEnd }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
     }
     return respond(res, 200)
   }
@@ -385,7 +385,7 @@ server.post('/api/create-site', async (req, res) => {
 		success_url: `${process.env.DOMAIN}/dashboard#welcome`,
 		cancel_url: `${process.env.DOMAIN}/signup`
 	}
-	if (process.env.NODE_ENV === 'production' && (handle === 'brendan' || handle === 'nprimsa' || handle === 'john')) sessionData.subscription_data = { coupon: '3x5LLtG3' }
+	if (process.env.NODE_ENV === 'production' && (handle === 'brendan' || handle === 'nick' || handle === 'john' || handle === 'allison')) sessionData.subscription_data = { coupon: '3x5LLtG3' }
   const session = await stripe.checkout.sessions.create(sessionData);
 
   res.cookie('auth', await jwtSignP({ userId: res.locals.userId, siteId: site.id, billingPeriodEnd: unixTimestamp(), permissions: permissions.forOwner() }, process.env.JWT_SECRET), { httpOnly: true, signed: true })
