@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <title>{{ site.title }}</title>
+    <title>{{ site.name }}</title>
     <meta name="description" content="{{ site.description }}" />
 
     <meta name="HandheldFriendly" content="True" />
@@ -18,44 +18,52 @@
   </head>
   <body class="home-template">
 
-    <header class="main-header no-cover">
-      <nav class="main-nav overlay clearfix">
-        <a class="subscribe-button" href="/feed.xml ">Subscribe</a>
-      </nav>
-      <div class="vertical">
-        <div class="main-header-content inner">
-          <h1 class="page-title">{{ site.name }}</h1>
-          <h2 class="page-description">
-            {{ site.description }}
-            <!--<a href='/kasper/about.html'>About me </a>-->
-          </h2>
+    <header class="site-header">
+      <nav class="site-nav">
+        <div class="nav-logo">
+          <a href="/">
+            {{ site.name }}
+          </a>
         </div>
-      </div>
+        <ul class="nav-links">
+          <li class="link-item">
+            <a href="/feed.xml">
+              Subscribe
+              <span class="svg-icon right">
+                <svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="header-content">
+        <h1 class="header-title">
+         {{ site.name }}
+        </h1>
+        <h2 class="header-description">
+         {{ site.description }}
+        </h2>
+     </div>
     </header>
-    <main id="content" class="content" role="main">
+
+
+    <main id="content" class="content posts" role="main">
 
       {% for post in posts %}
-      <article class="post">
-        <header class="post-header">
-          <h2 class="post-title"><a href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h2>
-        </header>
-        <section class="post-excerpt">
-          <p>{{ post.content | truncate: 100 | markdown }}</p>
+        <article class="post">
 
-          {% if post.content.size > 100 %}
-            <a class="read-more" href="url">&raquo;</a>
-          {% endif %}
-        </section>
+          <header class="post-header">
+            <h2 class="post-title"><a href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h2>
+            <time class="post-date" datetime="2013-11-10">
+              {{ post.publishedAt | date: "%B %d, %Y" }}
+            </time>
+          </header>
 
-        <footer class="post-meta">
+          <section class="post-excerpt">
+            <p>{{ post.content | truncate: 100 | markdown | strip_html}}</p>
+          </section>
 
-          {% if post.userAvatar %}<img class="author-thumb" src="{{ post.userAvatar }}" alt="{{ post.userName }} profile image" nopin="nopin" />{% endif %}
-          {{ post.userName }}
-          <time class="post-date" datetime="2013-11-10">
-            {{ post.publishedAt | date: '%m/%d/%Y' }}
-          </time>
-        </footer>
-      </article>
+        </article>
       {% endfor %}
 
 

@@ -1,4 +1,26 @@
+// variables
 
-@import 'style.css/style.scss';
+@import 'scss/fonts';
+@import 'scss/colors';
 
+// default settings
+
+$font-body:         $system-serif !default;
+$font-headings:     $system-sans !default;
+$font-code:         $system-mono !default;
+$font-size-body:    16px !default;
+$font-size-scale:   0.25vw !default;
+$line-height-body:  1.55 !default;
+$line-height-pre:   1.45 !default;
+$link-color:        #0074d9 !default;
+
+@import 'scss/document';
+@import 'scss/typography/index';
+@import 'scss/embedded';
+@import 'scss/forms';
+@import 'scss/interactive';
+@import 'scss/scripting';
+@import 'scss/hidden';
+@import 'scss/animation';
+@import 'scss/layout';
 
