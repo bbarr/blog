@@ -1385,12 +1385,6 @@ body .editor-preview-full * {
   flex: 1 1 0%;
 }
 
-.clearfix:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
 .font-normal {
   font-weight: 400;
 }
@@ -1766,12 +1760,6 @@ body .editor-preview-full * {
 
 .tracking-wide {
   letter-spacing: 0.025em;
-}
-
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .w-4 {

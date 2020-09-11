@@ -12,12 +12,14 @@ const bcrypt = require('bcrypt')
 const { Liquid } = require('liquidjs')
 const AWS = require('aws-sdk')
 const stripe = require('stripe')(process.env.STRIPE_SECRET)
+const sass = require('node-sass')
 
 const db = require('./db')
 const permissions = require('./permissions')
 
 const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
+const readP = util.promisify(fs.readFile)
 const server = express()
 const liquid = new Liquid();
 
@@ -196,6 +198,24 @@ server.put('/api/settings', (req, res) => {
     return respond(res, 400, siteUpdatesE.message)
 
   respond(res, 200)
+})
+
+const previews = {}
+
+server.get('/preview-css/:themeId.css', async (req, res) => {
+  const { themeId } = req.params
+  console.log(themeId, previews)
+  if (!previews[themeId])
+    previews[themeId] = await new Promise(async (resolve) => {
+      const raw = await readP(`${process.env.THEMES_DIR}/${themeId}/style.scss`, 'utf8')
+      sass.render({ data: `.editor-preview { ${raw} }`, includePaths: [ 'node_modules/' ] }, (e, rendered) => {
+        console.log(e, rendered)
+        resolve(rendered.css.toString())
+      })
+    })
+
+  res.set('Content-type', 'text/css')
+  res.status(200).send(previews[themeId])
 })
 
 server.get('/api/posts/:id', (req, res) => {
