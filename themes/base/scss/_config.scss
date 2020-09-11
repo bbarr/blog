@@ -1,0 +1,83 @@
+/***************
+COLOR VARIABLES
+***************/
+
+// Better default colors
+// Cool
+$aqua:  #7FDBFF;
+$blue:  #0074D9;
+$navy:  #001F3F;
+$teal:  #39CCCC;
+$green: #2ECC40;
+$olive: #3D9970;
+$lime:  #01FF70;
+// Warm
+$yellow:  #FFDC00;
+$orange:  #FF851B;
+$red:     #FF4136;
+$fuchsia: #F012BE;
+$purple:  #B10DC9;
+$maroon:  #85144B;
+// Gray Scale
+$white:  #fff;
+$silver: #ddd;
+$grey:   #aaa;
+$black:  #111;
+
+// Color variables
+$primary-color: #3a3a3a;
+$secondary-color: #233E5B;
+$tertiary-color: gray;
+$link-color: $primary-color;
+$background-color: $primary-color;
+
+$bad-color: $red; // Bad color for errors, validation etc.
+$good-color: $green; // Good color for success etc.
+$info-color: $blue; // Good color for success etc.
+$warning-color: $orange; // Good color for success etc.
+$subtle-color: $grey; // Subtle color for subtle text
+
+
+/***************
+CONSISTENT SETTINGS
+***************/
+
+$br: 5px; // Border-radius
+$btn-br: 5px; // Button border-radius
+$padding: 40px; // Padding and margins
+$line-height: 44px; // Consistent height for buttons, inputs etc.
+
+
+/***************
+TYPE SETTINGS
+***************/
+
+$system-sans:  -apple-system, BlinkMacSystemFont, 'avenir next', avenir, // mac, ios
+               'segoe ui', // windows
+               'fira sans', // firefox os
+               roboto, noto, 'droid sans', // android
+               'liberation sans', // linux
+               'lucida grande', 'helvetica neue', helvetica, // old mac
+               'franklin gothic medium', 'century gothic', // old windows
+               cantarell, oxygen, ubuntu, // old linux
+               sans-serif; // fallback
+
+$system-serif: charter, constantia, // mac
+               'lucida bright', lucidabright, 'lucida serif', lucida, // windows
+               'dejavu serif', 'bitstream vera serif', 'liberation serif', // linux
+               georgia, // old systems
+               serif; // fallback
+
+$system-mono:  menlo, // mac
+               inconsolata, consolas, // windows
+               'fira mono', // firefox os
+               'noto mono', 'droid sans mono', // android
+               'liberation mono', 'dejavu sans mono', 'ubuntu mono', // linux
+               monaco, 'courier new', // older systems
+               monospace; // fallback
+
+
+
+$sans-serif: $system-sans;
+$serif: $system-serif;
+$mono: $system-mono;

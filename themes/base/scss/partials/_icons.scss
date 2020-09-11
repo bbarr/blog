@@ -1,0 +1,22 @@
+.svg-icon {
+  display: inline-flex;
+  align-self: center;
+  fill: currentColor;
+  width: 1em;
+  height: 1em;
+}
+
+.svg-icon svg {
+  height:1em;
+  width:1em;
+  top: .125em;
+  position: relative;
+}
+
+.svg-icon.left {
+  margin-right: 0.2em;
+}
+
+.svg-icon.right {
+  margin-left: 0.2em;
+}

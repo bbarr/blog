@@ -1,26 +1,39 @@
-// variables
+//
+//    ________  ________  ________  ________  ________  ___  ________     
+//    |\   __  \|\   __  \|\   __  \|\   ____\|\   __  \|\  \|\   ____\    
+//    \ \  \|\  \ \  \|\  \ \  \|\  \ \  \___|\ \  \|\  \ \  \ \  \___|    
+//     \ \   ____\ \   _  _\ \  \\\  \ \_____  \ \   __  \ \  \ \  \       
+//      \ \  \___|\ \  \\  \\ \  \\\  \|____|\  \ \  \ \  \ \  \ \  \____  
+//       \ \__\    \ \__\\ _\\ \_______\____\_\  \ \__\ \__\ \__\ \_______\
+//        \|__|     \|__|\|__|\|_______|\_________\|__|\|__|\|__|\|_______|
+//
+// Designed, built, and released under MIT license by Prosaic Labs
+// Based on [Long Haul](https://github.com/brianmaierjr/long-haul) by @brianmaierjr
 
-@import 'scss/fonts';
-@import 'scss/colors';
+// Reset using Normalize
+@import "scss/normalize";
 
-// default settings
+// Site configuration
+@import "scss/config"; 
 
-$font-body:         $system-serif !default;
-$font-headings:     $system-sans !default;
-$font-code:         $system-mono !default;
-$font-size-body:    16px !default;
-$font-size-scale:   0.25vw !default;
-$line-height-body:  1.55 !default;
-$line-height-pre:   1.45 !default;
-$link-color:        #0074d9 !default;
+// Import Partials
+@import "scss/partials/typography";
+@import "scss/partials/mixins";
+@import "scss/partials/icons";
+@import "scss/partials/animations";
 
-@import 'scss/document';
-@import 'scss/typography/index';
-@import 'scss/embedded';
-@import 'scss/forms';
-@import 'scss/interactive';
-@import 'scss/scripting';
-@import 'scss/hidden';
-@import 'scss/animation';
-@import 'scss/layout';
+// Modules
+@import "scss/modules/buttons";
+@import "scss/modules/forms"; 
+@import "scss/modules/tables";
+@import "scss/modules/syntax"; 
+
+// Mobile up base styles
+@import "scss/breakpoints/mobileup";
+
+// Import media queries add more as you desire
+@media only screen and (min-width: 800px) { @import "scss/breakpoints/800up";} 
+@media only screen and (min-width: 1200px) { @import "scss/breakpoints/1200up";} 
+
+
 
