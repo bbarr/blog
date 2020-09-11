@@ -53,13 +53,13 @@ async function main() {
     engine.registerFilter('sluggify', sluggify)
     engine.registerFilter('markdown', marked)
 
-    const PER_PAGE = 2
+    const PER_PAGE = 10
 
     async function renderIndexPage(page) {
 
       const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
 
-      const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/' ] })
+      const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/', themeDir ] })
       const css = rendered.css.toString()
 
       await engine.renderFile('index.liquid', { 
@@ -86,10 +86,58 @@ async function main() {
       return hasMore && renderIndexPage(page + 1)
     }
 
+    async function renderFeedPage() {
+
+      const [ posts, _ ] = db.posts.getPage({ siteId, offset: 0, limit: 10 })
+
+      const str = `
+        <rss version="2.0">
+          <channel>
+            <title>${site.name}</title>
+            <link>https://${site.handle}.${process.env.HOSTNAME}</link>
+            <description>${site.description}</description>
+            ${posts.map(post => {
+              return `
+                <item>
+                  <title>${post.title}</title>
+                  <link>https://${site.handle}.${process.env.HOSTNAME}/posts/${sluggify(post.publishedTitle)}</link>
+                  <pubDate>${pubDate(new Date(post.publishedAt))}</pubDate>
+                </item>
+              `
+            }).join('')}
+          </channel>
+        </rss>
+      `
+
+      await writeP(`${siteDir}/feed.xml`, str)
+    }
+
+    function pubDate(date) {
+
+      if (typeof date === 'undefined') {
+        date = new Date();
+      }
+
+      var pieces     = date.toString().split(' '),
+          offsetTime = pieces[5].match(/[-+]\d{4}/),
+          offset     = (offsetTime) ? offsetTime : pieces[5],
+          parts      = [
+            pieces[0] + ',',
+            pieces[2],
+            pieces[1],
+            pieces[3],
+            pieces[4],
+            offset
+          ];
+
+      return parts.join(' ');
+    }
+
     // render index pages
     await renderIndexPage(0)
     
     // render feed
+    await renderFeedPage(0)
     
     // render about page
 

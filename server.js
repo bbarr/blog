@@ -207,8 +207,9 @@ server.get('/preview-css/:themeId.css', async (req, res) => {
   console.log(themeId, previews)
   if (!previews[themeId])
     previews[themeId] = await new Promise(async (resolve) => {
-      const raw = await readP(`${process.env.THEMES_DIR}/${themeId}/style.scss`, 'utf8')
-      sass.render({ data: `.editor-preview { ${raw} }`, includePaths: [ 'node_modules/' ] }, (e, rendered) => {
+      const themeDir = `${process.env.THEMES_DIR}/${themeId}`
+      const raw = await readP(`${themeDir}/style.scss`, 'utf8')
+      sass.render({ data: `.editor-preview { ${raw} }`, includePaths: [ 'node_modules/', themeDir ] }, (e, rendered) => {
         console.log(e, rendered)
         resolve(rendered.css.toString())
       })
