@@ -33,7 +33,9 @@ const selectSiteById = db.prepare('select id, name, handle, custom_domain, billi
 const selectSiteByBillingCustomerId = db.prepare('select id, billing_customer_id, billing_period_end from site where billing_customer_id=?')
 const selectDefaultSiteByUserId = db.prepare(`
   select 
-    s.id 
+    s.id as site_id,
+    p.list as permissions,
+    s.billing_period_end
   from 
     site s,
     user_site_permission p 
@@ -127,7 +129,7 @@ module.exports = {
     },
     create: db.transaction(props => {
       const info = insertSite.run(snakeKeys(props))
-      insertPermissions.run(snakeKeys({ userId: props.userId, siteId: props.siteId, list: props.permissions }))
+      insertPermissions.run(snakeKeys({ userId: props.userId, siteId: info.lastInsertRowid, list: props.permissions }))
       return selectSiteById.get(info.lastInsertRowid)
     }),
     updateBilling(props) {
