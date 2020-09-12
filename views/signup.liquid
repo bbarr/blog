@@ -29,7 +29,7 @@
           x-text="isLoading ? 'Creating...' : 'Create account'">
         </button>
         <p class="text-center text-gray-600 text-xs mt-6">
-        By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        By creating an account, you agree to our <a target="_blank" href="/terms.html">Terms of Service</a> and <a target="_blank" href="/privacy.html">Privacy Policy</a>
         </p>
       </form>
     </div>
@@ -62,9 +62,6 @@
         <button class="button mt-3"
           x-bind:disabled="isLoading"
           x-text="isLoading ? 'Continuing...' : 'Continue to payment'"></button>
-        <p class="text-center text-gray-600 text-xs mt-6">
-          By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-        </p>
       </form>
     </div>
   </template>
