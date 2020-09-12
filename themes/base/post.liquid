@@ -6,6 +6,8 @@
 
 {% include 'partials/head.html' %}
 
+{% assign rendered = post.content | markdown %}
+
 <body>
   <div class="breadcrumbs">
     <a href="/" class="breadcrumb">{{ site.name }}</a>
@@ -21,12 +23,25 @@
         <h1 class="postTitle">{{ post.title }}</h1>
         <p class="meta">{{ post.publishedAt | date: '%B %d, %Y' }} &middot; <span class="time">{{ post.content | size | divided_by: 540 | floor }}</span> Minute Read</p>
         
-        {{ post.content | markdown }}
+        {{ rendered }}
 
     </div>
   </div><!-- end .content -->
 
   {% include 'partials/footer.html' %}
+
+  {% assign withoutCode = rendered | remove_first: '<code' %}
+  {% if withoutCode.size < rendered.size %}
+    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightBlock(block)
+        })
+      })
+    </script>
+  {% endif %}
 
 </body>
 
