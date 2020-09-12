@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
-<!--[if IE 7]><html class="no-js lt-ie9 lt-ie8" <![endif]-->
-<!--[if IE 8]><html class="no-js lt-ie9" <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8" <![endif]-->
+<!--[if IE 8]><html lang="en" class="no-js lt-ie9" <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
 
 {% include 'partials/head.html' %}
 
@@ -32,14 +32,17 @@
 
   {% assign withoutCode = rendered | remove_first: '<code' %}
   {% if withoutCode.size < rendered.size %}
-    <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+    <link rel="preload" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css"></noscript>
     <script>
-      document.addEventListener('DOMContentLoaded', (event) => {
+      const script = document.createElement('script')
+      script.onload = () => {
         document.querySelectorAll('pre code').forEach((block) => {
           hljs.highlightBlock(block)
         })
-      })
+      }
+      script.src = 'https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js'
+      document.body.appendChild(script)
     </script>
   {% endif %}
 

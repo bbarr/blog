@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]><html class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
-<!--[if IE 7]><html class="no-js lt-ie9 lt-ie8" <![endif]-->
-<!--[if IE 8]><html class="no-js lt-ie9" <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
+<!--[if IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8" <![endif]-->
+<!--[if IE 8]><html lang="en" class="no-js lt-ie9" <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
 
 {% include 'partials/head.html' %}
 
@@ -17,7 +17,7 @@
             {% for post in posts %}
               <li>
                 <span class="date">{{ post.publishedAt | date: '%b %d, %Y' }}</span> 
-                <h3><a class="post-link" href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h3>
+                <h2 class="h3"><a class="post-link" href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h2>
                 <p>{{ post.content | truncate: 100 | markdown | strip_html }}</p>
               </li>
             {% endfor %}
