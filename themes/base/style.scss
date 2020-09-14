@@ -1,39 +1,174 @@
-//
-//    ________  ________  ________  ________  ________  ___  ________     
-//    |\   __  \|\   __  \|\   __  \|\   ____\|\   __  \|\  \|\   ____\    
-//    \ \  \|\  \ \  \|\  \ \  \|\  \ \  \___|\ \  \|\  \ \  \ \  \___|    
-//     \ \   ____\ \   _  _\ \  \\\  \ \_____  \ \   __  \ \  \ \  \       
-//      \ \  \___|\ \  \\  \\ \  \\\  \|____|\  \ \  \ \  \ \  \ \  \____  
-//       \ \__\    \ \__\\ _\\ \_______\____\_\  \ \__\ \__\ \__\ \_______\
-//        \|__|     \|__|\|__|\|_______|\_________\|__|\|__|\|__|\|_______|
-//
-// Designed, built, and released under MIT license by Prosaic Labs
-// Based on [Long Haul](https://github.com/brianmaierjr/long-haul) by @brianmaierjr
+@import 'sass/_reset.scss';
+@import 'sass/_type.scss';
 
-// Reset using Normalize
-@import "scss/normalize";
+header {
+    .content-container {
+      padding: 1em 0;
+      .content {
+        max-width: 740px;
+        padding: 0 20px;
+        margin: 0 auto;
+      }
+    }
+    h1 {
+        font-size: 1.375em;
+        margin-bottom: 1rem;
+    }
+    h1 a {
+        color: #333;
+        text-decoration: none;
+        border: none;
+    
+        &:hover {
+          color: #1E55AE;
+        }
+      }
+    p {
+        margin-top: 0;
+    }
+  }
 
-// Site configuration
-@import "scss/config"; 
+.home {
+    text-align: center;
+    h1 {
+        font-size: 2rem;
+    }
+}
+  
 
-// Import Partials
-@import "scss/partials/typography";
-@import "scss/partials/mixins";
-@import "scss/partials/icons";
-@import "scss/partials/animations";
+main {
+  max-width: 740px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
 
-// Modules
-@import "scss/modules/buttons";
-@import "scss/modules/forms"; 
-@import "scss/modules/tables";
-@import "scss/modules/syntax"; 
+.title-group {
+  .title h1 {
+    margin-bottom: 0.5em;
+  }
+  .date {
+    color: #555;
+    font-weight: 600;
+    margin: 0;
+  }
+  margin-bottom: 1.5em;
+}
 
-// Mobile up base styles
-@import "scss/breakpoints/mobileup";
+footer {
+  margin-top: 3em;
+  text-align: center;
+  .content-container {
+    padding: 2em 0;
+    .content {
+      max-width: 740px;
+      padding: 0 20px;
+      margin: 0 auto;
+    }
+  }
+  .copy {
+    border-right: 2px solid #ccc;
+    padding-right: 0.5em;
+    margin-right: 1em;
+  }
+  a {
+      text-decoration: none;
+  }
+}
 
-// Import media queries add more as you desire
-@media only screen and (min-width: 800px) { @import "scss/breakpoints/800up";} 
-@media only screen and (min-width: 1200px) { @import "scss/breakpoints/1200up";} 
+.horizontal-links {
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 0.25em;
+  a {
+    border-right: 2px solid #ccc;
+    padding-right: 0.5em;
+    margin-right: 0.5em;
+  }
+  a:last-child {
+    border: none;
+  }
+  &:last-child {
+    margin-bottom: 1.25em;
+  }
+}
 
+.post-list {
+  h1 a {
+    color: #333;
+    text-decoration: none;
+    border: none;
 
+    &:hover {
+      color: #1E55AE;
+      border-bottom: 2px dotted #aaa;
+    }
+  }
+  .content {
+    margin-bottom: 1em;
+  }
+  .read-more {
+    margin-bottom: 1.25em;
+  }
 
+  padding-bottom: 1.5em;
+  border-bottom: 2px dotted #aaa;
+}
+
+.tags {
+  font-size: 0.9em;
+  padding: 1rem 0;
+  margin: 2rem 0;
+  border-top: 2px dotted #aaa;
+  .links {
+    display: inline;
+    margin-left: 0.5em;
+    a {
+      color: #aaa;
+      text-decoration: none;
+      border-bottom: none;
+      &:hover {
+        color: #888;
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.paginator {
+  margin: 2em 0;
+  .disabled {
+    color: #555;
+  }
+  .newer {
+    float: right;
+    clear: both;
+  }
+}
+
+.current-page {
+  color: #aaa;
+}
+
+.svg-icon {
+    display: inline-flex;
+    align-self: center;
+    fill: currentColor;
+    width: 1em;
+    height: 1em;
+  }
+  
+  .svg-icon svg {
+    height:1em;
+    width:1em;
+    top: .125em;
+    position: relative;
+  }
+  
+  .svg-icon.left {
+    margin-right: 0.2em;
+  }
+  
+  .svg-icon.right {
+    margin-left: 0.2em;
+  }
+  

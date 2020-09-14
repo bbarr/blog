@@ -1,54 +1,60 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
-<!--[if IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8" <![endif]-->
-<!--[if IE 8]><html lang="en" class="no-js lt-ie9" <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<!doctype html>
+<html lang="en">
 
-{% include 'partials/head.html' %}
+{% include 'partials/_head.liquid' %}
 
 {% assign rendered = post.content | markdown %}
 
-<body>
-  <div class="breadcrumbs">
-    <a href="/" class="breadcrumb">{{ site.name }}</a>
-  </div>
-  <div class="content">
-    <div class="container">
-        <div class="post">
-        {% if page.image %}
-          <div class="featuredImage">
-              <img src="{{ '/assets/img/' | prepend: site.baseurl | append: page.image }}" alt="" />
-            </div>
-        {% endif %}
-        <h1 class="postTitle">{{ post.title }}</h1>
-        <p class="meta">{{ post.publishedAt | date: '%B %d, %Y' }} &middot; <span class="time">{{ post.content | size | divided_by: 540 | floor }}</span> Minute Read</p>
-        
-        {{ rendered }}
-
+<header>
+    <div class="content-container">
+        <div class="content">
+            <h1><a href="/">‹ {{ site.name }}</a></h1>
+        </div>
     </div>
-  </div><!-- end .content -->
+</header>
 
-  {% include 'partials/footer.html' %}
+<main>
+    <div class="post">
 
-  {% assign withoutCode = rendered | remove_first: '<code' %}
-  {% if withoutCode.size < rendered.size %}
-    <link rel="preload" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css"></noscript>
-    <script>
-      const script = document.createElement('script')
-      script.onload = () => {
+        <div class="title-group">
+            <div class="title">
+                <h1>{{ post.title }}</h1>
+            </div>
+            <div class="date">{{ post.publishedAt | date: '%b %d, %Y' }} &middot; <span
+                    class="time">{{ post.content | size | divided_by: 540 | floor }}</span> Minute Read</div>
+        </div>
+
+        <article class="content">
+            {{ rendered }}
+        </article>
+
+        <div class="tags">
+            <span title="Tags">🏷</span>
+            <div class="horizontal-links links">
+                <a href="/">Tag</a>
+            </div>
+        </div>
+</main>
+
+{% include 'partials/_footer.liquid' %}
+
+{% assign withoutCode = rendered | remove_first: '<code' %}
+{% if withoutCode.size < rendered.size %}
+<link rel="preload" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css"></noscript>
+<script>
+    const script = document.createElement('script')
+    script.onload = () => {
         document.querySelectorAll('pre code').forEach((block) => {
-          hljs.highlightBlock(block)
+            hljs.highlightBlock(block)
         })
-      }
-      script.src = 'https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js'
-      document.body.appendChild(script)
-    </script>
-  {% endif %}
+    }
+    script.src = 'https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js'
+    document.body.appendChild(script)
+</script>
+{% endif %}
 
 </body>
-
 </html>
-
-
-

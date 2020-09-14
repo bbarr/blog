@@ -1,43 +1,55 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8 lt-ie7"><![endif]-->
-<!--[if IE 7]><html lang="en" class="no-js lt-ie9 lt-ie8" <![endif]-->
-<!--[if IE 8]><html lang="en" class="no-js lt-ie9" <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<!doctype html>
+<html lang="en">
 
-{% include 'partials/head.html' %}
+{% include 'partials/_head.liquid' %}
 
-<body> 
-
-   {% include 'partials/hero.html' %}
-
-   <div class="content">
-      <div class="container">
-        <div class="home" id="home">
-          <ul class="posts noList">
-            {% for post in posts %}
-              <li>
-                <span class="date">{{ post.publishedAt | date: '%b %d, %Y' }}</span> 
-                <h2 class="h3"><a class="post-link" href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h2>
-                <p>{{ post.content | truncate: 100 | markdown | strip_html }}</p>
-              </li>
-            {% endfor %}
-          </ul>
-          <!-- Pagination links -->
-          <div class="pagination">
-            {% if prevPage %}
-              <a href="{% if prevPage == 0 %}/{% else %}/pages/{{ prevPage}}.html{% endif %}" class="previous button__outline-tertiary">Newer Posts</a> 
-            {% endif %}
-            {% if nextPage %}
-              <a href="/pages/{{ nextPage}}.html" class="next button__outline-tertiary">Older Posts</a>
-            {% endif %}
-          </div>
+<header class="home">
+    <div class="content-container">
+        <div class="content">
+            <h1>{{ site.name }}</h1>
+            <p>{{ site.description }}</p>
         </div>
-      </div>
-   </div><!-- end .content -->
+    </div>
+</header>
 
-   {% include 'partials/footer.html' %}
+<main>
+    {% for post in posts %}
+    <article class="post-list">
+
+        <div class="title-group">
+            <div class="title">
+                <h1><a href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h1>
+                <div class="date">{{ post.publishedAt | date: '%b %d, %Y' }}</div>
+            </div>
+        </div>
+
+        <div class="content">
+            {{ post.content | markdown | strip_html | truncate: 350 }}
+        </div>
+
+        <div class="read-more">
+            <a href="/posts/{{ post.publishedTitle | sluggify }}.html">Read "{{ post.title }}" ›</a>
+        </div>
+
+    </article>
+    {% endfor %}
+
+    <div class="paginator">
+        {% if prevPage %}
+        <a href="/" class="older">« Older posts</a>
+        {% else %}
+        <a class="older disabled">« Older posts</a>
+        {% endif %}
+
+        {% if nextPage %}
+        <a href="/" class="newer">Newer posts »</a>
+        {% else %}
+        <a class="newer disabled">Newer posts »</a>
+        {% endif %}
+    </div>
+</main>
+
+{% include 'partials/_footer.liquid' %}
 
 </body>
-
 </html>
-
