@@ -28,6 +28,7 @@
             {{ rendered }}
         </article>
 
+        {% if post.tags.size > 0 %}
         <div class="tags">
             <span title="Tags">Tags:</span>
             <div class="horizontal-links links">
@@ -37,6 +38,7 @@
               {% endfor %}
             </div>
         </div>
+        {% endif %}
 </main>
 
 {% include 'partials/_footer.liquid' %}
