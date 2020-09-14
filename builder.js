@@ -65,7 +65,7 @@ async function main() {
     engine.registerFilter('sluggify', sluggify)
     engine.registerFilter('markdown', marked)
 
-    const PER_PAGE = 10
+    const PER_PAGE = 20
 
     const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/', themeDir ] })
     const css = rendered.css.toString()
@@ -81,7 +81,7 @@ async function main() {
         posts, 
         css,
         nextPage: hasMore && page + 2, 
-        prevPage: page > 0 && page - 1 ,
+        prevPage: page > 0 && page,
         paginationPrefix: 'pages'
       }).then(output => {
         const name = page === 0 ? 'index.html' : `pages/${page + 1}.html`
@@ -174,20 +174,20 @@ async function main() {
     for (let [ tag, taggedPosts ] of Object.entries(tagData)) {
 
       const paginationPrefix = `tags/${tag}`
-      console.log('making dir?', paginationPrefix)
       await execP(`mkdir -p ${siteDir}/${paginationPrefix}`)
-      const pages = arrayChunksOf(20, taggedPosts)
+      const pages = arrayChunksOf(PER_PAGE, taggedPosts)
 
       for (let [ i, posts ] of pages.entries()) {
         await engine.renderFile('index.liquid', { 
           site, 
           posts,
           css,
-          nextPage: i < pages.length && i + 2, 
-          prevPage: i > 0 && i - 1,
+          currentTag: tag,
+          nextPage: i + 1 < pages.length && i + 2, 
+          prevPage: i > 0 && i,
           paginationPrefix
         }).then(async (output) => {
-          const path = i > 0 ? `${siteDir}/${paginationPrefix}/${i}.html` : `${siteDir}/${paginationPrefix}/index.html`
+          const path = i > 0 ? `${siteDir}/${paginationPrefix}/${i + 1}.html` : `${siteDir}/${paginationPrefix}/index.html`
           return writeP(path, output)
         })
       }

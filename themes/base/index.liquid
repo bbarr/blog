@@ -13,6 +13,12 @@
 </header>
 
 <main>
+    {% if currentTag %}
+      <div>
+        Filtering by tag: "{{ currentTag }}"
+        <a href="/">Clear</a>
+      </div>
+    {% endif %}
     {% for post in posts %}
     <article class="post-list">
 
@@ -36,13 +42,13 @@
 
     <div class="paginator">
         {% if prevPage %}
-        <a href="/" class="older">« Older posts</a>
+        <a href="{% if prevPage == 1 %}{% if paginationPrefix == 'pages' %}/{% else %}/{{paginationPrefix}}{% endif %}{% else %}/{{ paginationPrefix }}/{{ prevPage}}.html{% endif %}" class="older">« Older Posts</a> 
         {% else %}
         <a class="older disabled">« Older posts</a>
         {% endif %}
 
         {% if nextPage %}
-        <a href="/" class="newer">Newer posts »</a>
+          <a href="/{{paginationPrefix}}/{{nextPage}}.html" class="newer">Newer posts »</a>
         {% else %}
         <a class="newer disabled">Newer posts »</a>
         {% endif %}

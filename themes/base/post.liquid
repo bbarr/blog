@@ -29,9 +29,12 @@
         </article>
 
         <div class="tags">
-            <span title="Tags">🏷</span>
+            <span title="Tags">Tags:</span>
             <div class="horizontal-links links">
-                <a href="/">Tag</a>
+              {% assign tags = post.tags | split: ',' %}
+              {% for tag in tags %}
+                <a href="/tags/{{ tag }}">#{{ tag }}</a>
+              {% endfor %}
             </div>
         </div>
 </main>
