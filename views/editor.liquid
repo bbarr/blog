@@ -113,7 +113,7 @@
     const api = {
       post: {{ post | json }},
       id: '{{ post.id }}',
-      title: '{{ post.title }}',
+      title: `{{ post.title }}`,
       content: `{{ post.content | escapeMarkdown }}`,
       tags: `{{ post.tags }}`,
       {% if post.latestPublishedAt != null %}
