@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<div class="mt-24" x-data="state()" x-init="init()">
+<div class="mt-16" x-data="state()" x-init="init()">
   <div class="back flex-1">
     <a href="/dashboard" class="btn btn-icon flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
@@ -80,10 +80,14 @@
   const actions = _actions.parentNode.removeChild(_actions)
   const container = document.createElement('div')
   const title = document.createElement('input')
-  title.setAttribute('placeholder', 'Post title')
+  title.setAttribute('placeholder', 'Title')
   title.setAttribute('x-model', 'title')
   const titleWrapper = document.createElement('div')
+  const tags = document.createElement('input')
+  tags.setAttribute('placeholder', 'Tags (comma-separated)')
+  tags.setAttribute('x-model', 'tags')
   titleWrapper.appendChild(title)
+  titleWrapper.appendChild(tags)
   {% if post.title.length == 0 %}title.setAttribute('autofocus', 'autofocus'){% endif %}
   title.classList.add('title')
   titleWrapper.classList.add('title-wrapper')
@@ -111,6 +115,7 @@
       id: '{{ post.id }}',
       title: '{{ post.title }}',
       content: `{{ post.content | escapeMarkdown }}`,
+      tags: `{{ post.tags }}`,
       {% if post.latestPublishedAt != null %}
       isPublished: true,
       publishButtonText: "Publish changes",
@@ -131,7 +136,7 @@
 
         setInterval(() => {
           if (lastTyped < Date.now() - 1000) {
-            if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content)) {
+            if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content || lastSaved.tags !== this.tags)) {
               this.save()
             }
           }
@@ -139,7 +144,7 @@
       },
       save() {
 
-        const { title, content, id } = api
+        const { tags, title, content, id } = api
         this.isSaving = true
 
         return fetch(`/api/posts/${id === 'new' ? '' : id}`, {
@@ -147,7 +152,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ title, content })
+          body: JSON.stringify({ tags, title, content })
         })
           .then(resp => resp.json().then(body => ([ resp, body ])))
           .then(([ resp, body ]) => {
@@ -160,6 +165,7 @@
             this.hasChanges = true
 
             lastSaved.title = title
+            lastSaved.tags = tags
             lastSaved.content = content
           })
       },
@@ -222,6 +228,14 @@
     })
 
     title.addEventListener('blur', () => {
+      toolbar.classList.remove('hidden')
+    })
+
+    tags.addEventListener('focus', () => {
+      toolbar.classList.add('hidden')
+    })
+
+    tags.addEventListener('blur', () => {
       toolbar.classList.remove('hidden')
     })
 

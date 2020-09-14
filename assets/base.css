@@ -912,14 +912,14 @@ body .title-wrapper {
   padding-right: 20px;
   width: 50%;
   margin: auto;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .sided--no-fullscreen .title-wrapper {
   width: 100%;
 }
 
-body .title {
+body .title-wrapper input {
   margin: auto;
   display: block;
   padding-top: 0.75rem;
@@ -929,7 +929,13 @@ body .title {
   max-width: 700px;
 }
 
-body .title:focus {
+body .title-wrapper input:last-child {
+  font-size: 1.125rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+body .title-wrapper input:focus {
   outline: 0;
 }
 
@@ -941,9 +947,8 @@ body .EasyMDEContainer.sided--no-fullscreen .CodeMirror {
   margin: auto;
 }
 
-body .EasyMDEContainer.sided--no-fullscreen .title {
-  max-width: 100%;
-  padding-left: 50px;
+body .EasyMDEContainer.sided--no-fullscreen .title-wrapper {
+  display: none;
 }
 
 body .editor-toolbar.sided--no-fullscreen {
@@ -962,6 +967,10 @@ body .sided--no-fullscreen .editor-preview-side {
   width: 50%;
   padding-left: 20px;
   padding-right: 20px;
+}
+
+body .CodeMirror-sided, body .editor-preview-side {
+  padding-top: 40px;
 }
 
 body .editor-preview-side *,
@@ -1488,10 +1497,6 @@ body .editor-preview-full * {
 
 .mt-16 {
   margin-top: 4rem;
-}
-
-.mt-24 {
-  margin-top: 6rem;
 }
 
 .mb-24 {

@@ -159,7 +159,7 @@ server.get('/signup', (req, res) => {
 server.get('/editor/new', (req, res) => {
   const site = db.sites.byId(res.locals.siteId)
   res.render('editor.liquid', {
-    post: { id: 'new', title: '', content: '' },
+    post: { id: 'new', title: '', tags: '', content: '' },
     site
   })
 })
@@ -295,6 +295,7 @@ server.post('/api/posts', async (req, res) => {
     siteId: res.locals.siteId,
     userId: res.locals.userId,
     title: req.body.title,
+    tags: req.body.tags,
     content: req.body.content,
   })
 
@@ -313,6 +314,7 @@ server.put('/api/posts/:id',  (req, res) => {
     userId: res.locals.userId,
     id: req.params.id,
     title: req.body.title,
+    tags: req.body.tags,
     content: req.body.content
   })
 

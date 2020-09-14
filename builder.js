@@ -19,6 +19,17 @@ const writeP = util.promisify(fs.writeFile)
 const readP = util.promisify(fs.readFile)
 const execP = util.promisify(cp.exec.bind(cp))
 
+function arrayChunksOf(n, arr) {
+  const output = []
+  for (let i = 0; i < arr.length; i++) {
+    if (i === 0 || i % n === 0) {
+      output.push([])
+    }
+    output[output.length - 1].push(arr[i])
+  }
+  return output
+}
+
 let timeoutId
 
 async function main() {
@@ -41,6 +52,7 @@ async function main() {
     await execP(`rm -rf ${siteDir}`)
     await execP(`mkdir -p ${siteDir}/posts`)
     await execP(`mkdir -p ${siteDir}/pages`)
+    await execP(`mkdir -p ${siteDir}/tags`)
 
     function sluggify(str) {
       return str.toLowerCase().replace(/\W/g, '-')
@@ -55,25 +67,40 @@ async function main() {
 
     const PER_PAGE = 10
 
+    const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/', themeDir ] })
+    const css = rendered.css.toString()
+
+    const tagData = {}
+
     async function renderIndexPage(page) {
 
       const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
-
-      const rendered = await renderSassP({ file: `${themeDir}/style.scss`, includePaths: [ 'node_modules/', themeDir ] })
-      const css = rendered.css.toString()
 
       await engine.renderFile('index.liquid', { 
         site, 
         posts, 
         css,
         nextPage: hasMore && page + 2, 
-        prevPage: page > 0 && page - 1 
+        prevPage: page > 0 && page - 1 ,
+        paginationPrefix: 'pages'
       }).then(output => {
         const name = page === 0 ? 'index.html' : `pages/${page + 1}.html`
         return writeP(`${siteDir}/${name}`, output)
       })
 
       for (const post of posts) {
+        if (post.tags.length) {
+          for (let tag of post.tags.split(',')) {
+            ;(tagData[tag] || (tagData[tag] = [])).push({ 
+              url: `/posts/${sluggify(post.publishedTitle)}.html`, 
+              title: post.title, 
+              publishedTitle: 
+              post.publishedTitle, 
+              date: post.latestPublishedAt, 
+              content: post.content.slice(0, 100) 
+            })
+          }
+        }
         await engine.renderFile('post.liquid', {
           post,
           site,
@@ -141,10 +168,30 @@ async function main() {
     
     // render about page
 
-    // render posts
-  
     if (site.customDomain)
       await execP(`ln -s ${siteDir}/ ${process.env.SITES_DIR}/${site.customDomain}`)
+
+    for (let [ tag, taggedPosts ] of Object.entries(tagData)) {
+
+      const paginationPrefix = `tags/${tag}`
+      console.log('making dir?', paginationPrefix)
+      await execP(`mkdir -p ${siteDir}/${paginationPrefix}`)
+      const pages = arrayChunksOf(20, taggedPosts)
+
+      for (let [ i, posts ] of pages.entries()) {
+        await engine.renderFile('index.liquid', { 
+          site, 
+          posts,
+          css,
+          nextPage: i < pages.length && i + 2, 
+          prevPage: i > 0 && i - 1,
+          paginationPrefix
+        }).then(async (output) => {
+          const path = i > 0 ? `${siteDir}/${paginationPrefix}/${i}.html` : `${siteDir}/${paginationPrefix}/index.html`
+          return writeP(path, output)
+        })
+      }
+    }
 
     smallWait()
   } catch(e) {
