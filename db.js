@@ -135,9 +135,10 @@ module.exports = {
     updateBilling(props) {
       return updateSiteBilling.run(snakeKeys(props))
     },
-    update: props => {
-      return updateSite.run(snakeKeys(props))
-    },
+    update: db.transaction(props => {
+      updateSite.run(snakeKeys(props))
+      return insertDeploy.run(snakeKeys({ siteId: props.id }))
+    }),
     validateHandle(handle) {
       const existing = validateHandle.get(handle)
       console.log('existing handle', existing, handle)
