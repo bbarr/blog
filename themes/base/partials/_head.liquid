@@ -9,7 +9,6 @@
     {% if post %}
       <meta name="og:type" content="article">
       <meta name="og:title" content="{{ post.title }}">
-      <meta name="og:description" content="{{ post.content | markdown | stripe_html | gruncate: 100 }}">
       <meta name="og:url" content="https://{{ site.handle }}.{{ env.HOSTNAME }}/posts/{{ post.publishedTitle | sluggify }}.html">
     {% else %}
       <meta name="og:type" content="website">
