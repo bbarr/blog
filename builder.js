@@ -80,6 +80,7 @@ async function main() {
         site, 
         posts, 
         css,
+        env: process.env,
         nextPage: hasMore && page + 2, 
         prevPage: page > 0 && page,
         paginationPrefix: 'pages'
@@ -104,7 +105,8 @@ async function main() {
         await engine.renderFile('post.liquid', {
           post,
           site,
-          css
+          css,
+          env: process.env,
         }).then(async (output) => {
           await writeP(`${siteDir}/posts/${sluggify(post.publishedTitle)}.html`, output)
         })
@@ -182,6 +184,7 @@ async function main() {
           site, 
           posts,
           css,
+          env: process.env,
           currentTag: tag,
           nextPage: i + 1 < pages.length && i + 2, 
           prevPage: i > 0 && i,
