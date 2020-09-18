@@ -797,9 +797,9 @@ form input {
 }
 
 .menu {
-  width: 300px;
+  width: 400px;
   transition: transform .5s ease-in-out;
-  transform: translate3d(300px, 0, 0);
+  transform: translate3d(400px, 0, 0);
 }
 
 .menu.open {
@@ -890,16 +890,16 @@ form input {
 body .CodeMirror {
   margin: auto;
   border-width: 0;
+  min-height: 80vh;
+  max-width: 50%;
   padding-left: 20px;
   padding-right: 20px;
-  min-height: 80vh;
-  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 body .CodeMirror-lines {
   padding: 0;
-  max-width: 700px;
-  margin: auto;
 }
 
 body .CodeMirror pre.CodeMirror-line {
@@ -911,8 +911,13 @@ body .title-wrapper {
   padding-left: 20px;
   padding-right: 20px;
   width: 50%;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
   margin-bottom: 20px;
+}
+
+body .editor-preview-full {
+  padding: 0 20px;
 }
 
 .sided--no-fullscreen .title-wrapper {
@@ -921,18 +926,11 @@ body .title-wrapper {
 
 body .title-wrapper input {
   margin: auto;
-  display: block;
+  display: inline-block;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   font-size: 2.25rem;
   width: 100%;
-  max-width: 700px;
-}
-
-body .title-wrapper input:last-child {
-  font-size: 1.125rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
 }
 
 body .title-wrapper input:focus {
@@ -1033,6 +1031,9 @@ body .editor-preview-full * {
   width: 2.5rem;
   padding-left: 0;
   padding-right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .field-label {
@@ -1736,6 +1737,14 @@ body .editor-preview-full * {
 
 .z-10 {
   z-index: 10;
+}
+
+.z-20 {
+  z-index: 20;
+}
+
+.z-30 {
+  z-index: 30;
 }
 
 .transform {

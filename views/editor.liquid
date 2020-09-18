@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<div class="mt-16" x-data="state()" x-init="init()">
+<div class="pt-16" x-data="state()" x-init="init()">
   <div class="back flex-1">
     <a href="/dashboard" class="btn btn-icon flex-base"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'back' %}</span></a>
   </div>
@@ -13,25 +13,31 @@
     <button x-on:click="isMenuOpen ? isMenuOpen = false : isMenuOpen = true" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></a>
   </div>
 
-  <!--
-  <div x-bind:class="{ 'open': isMenuOpen }" class="menu fixed right-0 mt-16 top-0 bottom-0 border border-t-0">
+  <div x-bind:class="{ 'open': isSidebarOpen }" class="menu fixed right-0 z-20 mt-16 top-0 bottom-0 border border-t-0 bg-white">
+    <div class="bg-white h-16 flex items-center justify-between border-b border-gray-200 px-4">
+      <div class="font-semibold text-lg">Post settings</div>
+      <button @click="isSidebarOpen = false" class="btn btn-icon">{% include '_icon.liquid', name: 'close' %}</button>
+    </div>
     <div class="p-4">
-      <button x-show="isPublished" class="button mb-2" x-on:click="unpublish()">Unpublish</button>
-      <button class="button" x-on:click="_delete()">Delete</button>
+      <form>
+        <div class="field-label">Tags</div>
+        <input class="field-input" type="text" x-model="tags">
+        <small class="text-sm">Comma-separated list of tags</small>
+      </form>
     </div>
   </div>
-  -->
 
   <div id="editor">
     <textarea>{{ post.content }}</textarea>
   </div>
 
-  <div class="alert" x-bind:class="{ 'open': alert.open }">
+  <div class="alert z-30" x-bind:class="{ 'open': alert.open }">
     <div x-show="alert.title" class="alert-title" x-text="alert.title"></div>
     <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
   </div>
 
-  <div class="snowman-menu" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
+  <div class="snowman-menu z-20" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
+    <a x-show="isSidebarOpen === false" href="#" @click="(isSidebarOpen = true) && (isMenuOpen = false)">Edit settings</a>
     <a x-show="post.latestPublishedAt && post.latestPublishedAt < post.updatedAt" href="#" x-on:click="publish()">Publish changes</a>
     <a x-show="!post.latestPublishedAt && post.updatedAt" href="#" x-on:click="publish()">Publish</a>
     <a x-show="post && post.latestPublishedAt" href="#" x-on:click="unpublish()">Unpublish</a>
@@ -81,17 +87,14 @@
   const actions = _actions.parentNode.removeChild(_actions)
   const container = document.createElement('div')
   const title = document.createElement('input')
+  toolbar.classList.add('hidden')
   title.setAttribute('placeholder', 'Title')
   title.setAttribute('x-model', 'title')
   const titleWrapper = document.createElement('div')
-  const tags = document.createElement('input')
-  tags.setAttribute('placeholder', 'Tags (comma-separated)')
-  tags.setAttribute('x-model', 'tags')
   titleWrapper.appendChild(title)
-  titleWrapper.appendChild(tags)
   {% if post.title.length == 0 %}title.setAttribute('autofocus', 'autofocus'){% endif %}
   title.classList.add('title')
-  titleWrapper.classList.add('title-wrapper')
+  titleWrapper.classList.add('title-wrapper', 'mt-6')
   const editor = document.querySelector('.CodeMirror')
   editor.parentNode.insertBefore(titleWrapper, editor)
   const parent = toolbar.parentNode
@@ -126,6 +129,7 @@
       {% endif %}
       hasChanges: {% if post.updatedAt > post.latestPublishedAt or post.latestPublishedAt == null and post.updatedAt %}true{% else %}false{% endif %},
       isMenuOpen: false,
+      isSidebarOpen: false,
       isSaving: false,
       alert: {},
       init($dispatch) { 
@@ -219,27 +223,20 @@
       api.content = mde.value()
     })
 
-    let lastSaved = {
-      title: api.title,
-      content: api.content,
-      tags: api.tags
-    }
-
-    title.addEventListener('focus', () => {
-      toolbar.classList.add('hidden')
-    })
-
     title.addEventListener('blur', () => {
       toolbar.classList.remove('hidden')
     })
 
-    tags.addEventListener('focus', () => {
+    
+    title.addEventListener('focus', () => {
       toolbar.classList.add('hidden')
     })
 
-    tags.addEventListener('blur', () => {
-      toolbar.classList.remove('hidden')
-    })
+    let lastSaved = {
+      title: api.title,
+      content: api.content,
+      tags: api.tags,
+    }
 
     window.api = api
     return api

@@ -122,7 +122,8 @@ server.get('/dashboard', requireUser, (req, res) => {
   console.log(site)
   res.render('dashboard.liquid', {
     posts,
-    site
+    site,
+    env: process.env
   })
 })
 
