@@ -6,3 +6,4 @@ sites/
 assets/base.css
 main.db
 Caddyfile
+.DS_Store
