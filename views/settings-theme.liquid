@@ -1,0 +1,94 @@
+
+{% layout "layout.liquid" %}
+
+{% block content %}
+
+<div class="flex" x-data="state()">
+
+  <sidebar class="h-screen w-56 bg-gray-100 py-6">
+    <div class="px-6">
+      <h1>{{ site.name }}</h1>
+      <h2 class="text-gray-800 text-sm">{{ site.handle }}.{{ env.HOSTNAME }}</h2>
+    </div>
+    <p class="uppercase text-gray-600 mt-8 mb-2 text-sm px-6">Content</p>
+    <nav>
+      <a class="side-menu-link" href="/dashboard">{% include '_icon.liquid', name: 'page' %}Posts</a>
+    </nav>
+    <p class="uppercase text-gray-600 mt-6 mb-2 text-sm px-6">Settings</p>
+    <nav>
+      <a class="side-menu-link" href="/settings/general">{% include '_icon.liquid', name: 'cog' %}General</a>
+      <a class="side-menu-link active" href="/settings/theme">{% include '_icon.liquid', name: 'palette' %}Theme</a>
+    </nav>
+  </sidebar>
+
+  <div class="flex-1 p-6 border-l border-r max-w-lg" x-data="state()">
+
+    <div class="alert" x-bind:class="{ 'open': alert.open }">
+      <div x-show="alert.title" class="alert-title" x-text="alert.title"></div>
+      <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
+    </div>
+
+    <h2 class="border-b pb-4 font-medium text-lg">Theme settings</h1>
+    <form x-on:submit.prevent="save()" class="space-y-4">
+      <div>
+        <label class="field-label">Layout</label>
+        <label><input class="" x-model="themeSettings[themeId].layout" type="radio" name="layout" value="top">Top</label>
+        <label><input class="" x-model="themeSettings[themeId].layout" type="radio" name="layout" value="side">Side</label>
+      </div>
+      <div>
+        <label class="field-label">Mode</label>
+        <label><input class="" x-model="themeSettings[themeId].mode" type="radio" name="mode" value="light">Light</label>
+        <label><input class="" x-model="themeSettings[themeId].mode" type="radio" name="mode" value="dark">Dark</label>
+      </div>
+      <div class="flex items-center justify-between">
+        <button class="button flex-1 mr-2">Save</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<script>
+  function state() {
+
+    const themes = '{{ themes | json }}'
+
+    const themeSettings = JSON.parse('{{ site.themeSettings }}')
+
+    const api = {
+
+      alert: { title: '', content: '' },
+
+      themeSettings,
+
+      themeId: '{{ site.themeId }}',
+
+      save() {
+        return fetch('/api/theme-settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            themeId: this.themeId,
+            themeSettings: {
+              ...themeSettings,
+              [this.themeId]: this.themeSettings[this.themeId]
+            }
+          })
+
+        }).then(resp => resp.json())
+          .then(json => {
+            debugger
+          })
+      }
+    }
+
+    return api
+  }
+</script>
+
+{% endblock %}

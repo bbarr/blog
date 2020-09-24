@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+
+{% include 'partials/_head.liquid' %}
+
+{% assign rendered = post.content | markdown %}
+
+<header>
+    <div class="content-container">
+        <div class="content">
+            <h1><a href="/">‹ {{ site.name }}</a></h1>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="post">
+
+        <div class="title-group">
+            <div class="title">
+                <h1>{{ post.title }}</h1>
+            </div>
+            <div class="date">{{ post.publishedAt | date: '%b %d, %Y' }} &middot; <span
+                    class="time">{{ post.content | size | divided_by: 540 | floor }}</span> Minute Read</div>
+        </div>
+
+        <article class="content">
+            {{ rendered }}
+        </article>
+
+        {% if post.tags.size > 0 %}
+        <div class="tags">
+            <span title="Tags">Tags:</span>
+            <div class="horizontal-links links">
+              {% assign tags = post.tags | split: ',' %}
+              {% for tag in tags %}
+                <a href="/tags/{{ tag }}">#{{ tag }}</a>
+              {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+</main>
+
+{% include 'partials/_footer.liquid' %}
+
+{% assign withoutCode = rendered | remove_first: '<code' %}
+{% if withoutCode.size < rendered.size %}
+<link rel="preload" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css"></noscript>
+<script>
+    const script = document.createElement('script')
+    script.onload = () => {
+        document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightBlock(block)
+        })
+    }
+    script.src = 'https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js'
+    document.body.appendChild(script)
+</script>
+{% endif %}
+
+</body>
+</html>

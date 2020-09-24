@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+{% include 'partials/_head.liquid' %}
+
+<header class="home">
+    <div class="content-container">
+        <div class="content">
+            <h1>{{ site.name }} BASE ALT</h1>
+            <p>{{ site.description }}</p>
+        </div>
+    </div>
+</header>
+
+<main>
+    {% if currentTag %}
+      <div>
+        Filtering by tag: "{{ currentTag }}"
+        <a href="/">Clear</a>
+      </div>
+    {% endif %}
+    {% for post in posts %}
+    <article class="post-list">
+
+        <div class="title-group">
+            <div class="title">
+                <h1><a href="/posts/{{ post.publishedTitle | sluggify }}.html">{{ post.title }}</a></h1>
+                <div class="date">{{ post.publishedAt | date: '%b %d, %Y' }}</div>
+            </div>
+        </div>
+
+        <div class="content">
+            {{ post.content | markdown | strip_html | truncate: 350 }}
+        </div>
+
+        <div class="read-more">
+            <a href="/posts/{{ post.publishedTitle | sluggify }}.html">Read "{{ post.title }}" ›</a>
+        </div>
+
+    </article>
+    {% endfor %}
+
+    <div class="paginator">
+        {% if prevPage %}
+        <a href="{% if prevPage == 1 %}{% if paginationPrefix == 'pages' %}/{% else %}/{{paginationPrefix}}{% endif %}{% else %}/{{ paginationPrefix }}/{{ prevPage}}.html{% endif %}" class="older">« Older Posts</a> 
+        {% endif %}
+
+        {% if nextPage %}
+          <a href="/{{paginationPrefix}}/{{nextPage}}.html" class="newer">Newer posts »</a>
+        {% endif %}
+    </div>
+</main>
+
+{% include 'partials/_footer.liquid' %}
+
+</body>
+</html>

@@ -29,7 +29,7 @@ const insertUser = db.prepare('insert into user (name, email, hashed_password) v
 const updateUser = db.prepare('update user set name=@name, email=@email, avatar=@avatar where id=@id')
 
 // site
-const selectSiteById = db.prepare('select id, name, handle, custom_domain, billing_customer_id, billing_period_end, theme_id, description, timezone, favicon from site where id=?')
+const selectSiteById = db.prepare('select id, name, handle, custom_domain, billing_customer_id, billing_period_end, theme_id, theme_settings, description, timezone, favicon from site where id=?')
 const selectSiteByBillingCustomerId = db.prepare('select id, billing_customer_id, billing_period_end from site where billing_customer_id=?')
 const selectDefaultSiteByUserId = db.prepare(`
   select 
@@ -58,6 +58,7 @@ const updateSiteBilling = db.prepare(`
    where id=@id
 `)
 const updateSite = db.prepare('update site set name=@name, description=@description, favicon=@favicon, timezone=@timezone, custom_domain=@custom_domain where id=@id')
+const updateSiteTheme = db.prepare('update site set theme_id=@theme_id, theme_settings=@theme_settings where id=@id')
 const validateHandle = db.prepare('select 1 from site where handle=?')
 const validateDomain = db.prepare('select 1 from site where custom_domain=?')
 
@@ -137,6 +138,10 @@ module.exports = {
     },
     update: db.transaction(props => {
       updateSite.run(snakeKeys(props))
+      return insertDeploy.run(snakeKeys({ siteId: props.id }))
+    }),
+    updateTheme: db.transaction(props => {
+      updateSiteTheme.run(snakeKeys(props))
       return insertDeploy.run(snakeKeys({ siteId: props.id }))
     }),
     validateHandle(handle) {

@@ -127,16 +127,18 @@ server.get('/dashboard', requireUser, (req, res) => {
   })
 })
 
-server.get('/settings', requireUser, (req, res) => {
+server.get('/settings/:type', requireUser, (req, res) => {
 
   const user = db.users.byId(res.locals.userId)
   const posts = db.posts.bySiteId(res.locals.siteId)
   const site = db.sites.byId(res.locals.siteId)
+  const themes = [ { id: 'base', label: 'Base' }, { id: 'base-alt', label: 'Alt Base' } ]
 
-  res.render('settings.liquid', {
+  res.render(`settings-${req.params.type}.liquid`, {
     user,
     posts,
-    site
+    site,
+    themes
   })
 })
 
@@ -196,6 +198,20 @@ server.put('/api/settings', (req, res) => {
   })
 
   if (siteUpdatesE)
+    return respond(res, 400, siteUpdatesE.message)
+
+  respond(res, 200)
+})
+
+server.put('/api/theme-settings', (req, res) => {
+
+  const [ siteUpdates, siteUpdatesE ] = safe(db.sites.updateTheme, {
+    id: res.locals.siteId,
+    themeId: req.body.themeId,
+    themeSettings: JSON.stringify(req.body.themeSettings)
+  })
+
+  if (siteUpdatesE) 
     return respond(res, 400, siteUpdatesE.message)
 
   respond(res, 200)
@@ -388,6 +404,7 @@ server.post('/api/create-site', async (req, res) => {
   const [ site, siteE ] = safe(db.sites.create, { 
     billingCustomerId: '',
     billingSubscriptionId: '',
+    themeId: 'base',
     billingPeriodEnd: unixTimestamp(),
     permissions: permissions.forOwner(),
     name,
