@@ -132,7 +132,36 @@ server.get('/settings/:type', requireUser, (req, res) => {
   const user = db.users.byId(res.locals.userId)
   const posts = db.posts.bySiteId(res.locals.siteId)
   const site = db.sites.byId(res.locals.siteId)
-  const themes = [ { id: 'base', label: 'Base' }, { id: 'base-alt', label: 'Alt Base' } ]
+  const themes = [ 
+    { 
+      id: 'base', 
+      label: 'Base' 
+    }, 
+    { 
+      id: 'paper', 
+      label: 'Paper',
+      settings: [
+        {
+          type: 'multi', 
+          label: 'Layout',
+          id: 'layout',
+          options: [
+            { label: 'Top', value: 'top' },
+            { label: 'Side', value: 'side' }
+          ]
+        },
+        {
+          type: 'multi', 
+          label: 'Mode',
+          id: 'mode',
+          options: [
+            { label: 'Light', value: 'light' },
+            { label: 'Dark', value: 'dark' }
+          ]
+        }
+      ]
+    } 
+  ]
 
   res.render(`settings-${req.params.type}.liquid`, {
     user,

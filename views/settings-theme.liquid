@@ -28,18 +28,30 @@
       <div x-show="alert.content" class="alert-content" x-text="alert.content"></div>
     </div>
 
-    <h2 class="border-b pb-4 font-medium text-lg">Theme settings</h1>
+    <div class="border-b pb-4 flex justify-between items-center">
+      <div class=" font-medium text-lg">Theme settings</div>
+      <!--
+      <button class="button w-auto px-4" x-on:click="toggleThemeChange()" x-text="themeChanging ? 'Cancel' : 'Change theme'"></button>
+      -->
+    </div>
     <form x-on:submit.prevent="save()" class="space-y-4">
-      <div>
-        <label class="field-label">Layout</label>
-        <label><input class="" x-model="themeSettings[themeId].layout" type="radio" name="layout" value="top">Top</label>
-        <label><input class="" x-model="themeSettings[themeId].layout" type="radio" name="layout" value="side">Side</label>
-      </div>
-      <div>
-        <label class="field-label">Mode</label>
-        <label><input class="" x-model="themeSettings[themeId].mode" type="radio" name="mode" value="light">Light</label>
-        <label><input class="" x-model="themeSettings[themeId].mode" type="radio" name="mode" value="dark">Dark</label>
-      </div>
+      <template x-for="(item, index, collection) in currentTheme.settings">
+        <div>
+        <template x-if="item.type === 'multi'">
+          <div>
+            <label class="field-label" x-text="item.label"></label>
+            <select x-model="themeSettings[themeId][item.id]">
+              <template x-for="(item2, index2, collection2) in item.options">
+                <option 
+                  x-bind:value="item2.value" 
+                  x-bind:selected="item2.value === themeSettings[themeId][item.id]"
+                  x-text="item2.label">
+              </template>
+            </select>
+          </div>
+        </template>
+        </div>
+      </template>
       <div class="flex items-center justify-between">
         <button class="button flex-1 mr-2">Save</button>
       </div>
@@ -54,17 +66,27 @@
 <script>
   function state() {
 
-    const themes = '{{ themes | json }}'
+    const themes = JSON.parse('{{ themes | json }}')
 
     const themeSettings = JSON.parse('{{ site.themeSettings }}')
 
     const api = {
+
+      themes,
 
       alert: { title: '', content: '' },
 
       themeSettings,
 
       themeId: '{{ site.themeId }}',
+
+      currentTheme: themes.find(theme => theme.id === '{{ site.themeId }}'),
+
+      themeChanging: false,
+
+      toggleThemeChange() {
+        this.themeChanging = !this.themeChanging
+      },
 
       save() {
         return fetch('/api/theme-settings', {

@@ -24,6 +24,7 @@ const camelKeys = transformKeys.bind(null, snakeToCamel)
 
 // user
 const selectUserByEmail = db.prepare('select id, avatar, name, email, hashed_password from user where email=?')
+const selectUserBySiteId = db.prepare('select u.id, u.avatar, u.name, u.email from user u, user_site_permission usp where usp.site_id = ? and usp.user_id = u.id')
 const selectUserById = db.prepare('select id, avatar, name, email from user where id=?')
 const insertUser = db.prepare('insert into user (name, email, hashed_password) values (@name, @email, @hashed_password)')
 const updateUser = db.prepare('update user set name=@name, email=@email, avatar=@avatar where id=@id')
@@ -197,11 +198,15 @@ module.exports = {
         const deploy = camelKeys(rawDeploy)
         if (deploy) deleteDeploy.run(deploy.id)
         const site = selectSiteById.get(deploy.siteId)
+        site && (site.theme_settings = JSON.parse(site.theme_settings))
+        console.log(site.theme_settings)
         const post = selectPostById.get(deploy.postId)
+        const user = selectUserBySiteId.get(deploy.siteId)
         return [
           deploy,
           site ? camelKeys(site) : site,
-          post ? camelKeys(post) : post
+          post ? camelKeys(post) : post,
+          user ? camelKeys(user) : user
         ]
       }
       return []

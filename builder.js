@@ -36,7 +36,7 @@ async function main() {
   clearTimeout(timeoutId)
     
   console.log('builder checking...')
-  const [ deploy, site ] = db.deploys.pull()
+  const [ deploy, site, post, user ] = db.deploys.pull()
 
   if (!deploy) return bigWait()
 
@@ -77,7 +77,8 @@ async function main() {
       const [ posts, hasMore ] = db.posts.getPage({ siteId, offset: page * PER_PAGE, limit: PER_PAGE })
 
       await engine.renderFile('index.liquid', { 
-        site, 
+        site,
+        user,
         posts, 
         css,
         env: process.env,
@@ -105,6 +106,7 @@ async function main() {
         await engine.renderFile('post.liquid', {
           post,
           site,
+          user,
           css,
           env: process.env,
         }).then(async (output) => {
@@ -183,6 +185,7 @@ async function main() {
         await engine.renderFile('index.liquid', { 
           site, 
           posts,
+          user,
           css,
           env: process.env,
           currentTag: tag,
