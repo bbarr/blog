@@ -29,33 +29,53 @@
     </div>
 
     <div class="border-b pb-4 flex justify-between items-center">
-      <div class=" font-medium text-lg">Theme settings</div>
+      <div class=" font-medium text-lg flex items-center">
+        <a x-show="themeChanging" href="#" class="h-4 w-4 mr-2" @click.prevent="themeChanging = false">{% include './_icon.liquid', name: 'back' %}</a>
+        <span x-text="themeChanging ? 'Select a theme' : 'Theme settings'"></span>
+      </div>
       <!--
       <button class="button w-auto px-4" x-on:click="toggleThemeChange()" x-text="themeChanging ? 'Cancel' : 'Change theme'"></button>
       -->
     </div>
-    <form x-on:submit.prevent="save()" class="space-y-4">
-      <template x-for="(item, index, collection) in currentTheme.settings">
-        <div>
-        <template x-if="item.type === 'multi'">
+    <template x-if="themeChanging">
+      <form @submit.prevent="apply()" class="space-y-4">
+        <template x-for="(item, index, collection) in themes">
+          <a href="#" class="p-4 flex justify-between no-underline" @click.prevent="preview()" :class="{ 'bg-gray-100': currentTheme.id == item.id }">
+            <span x-text="item.label"></span>
+          </a>
+        </template>
+        <div class="flex items-center justify-between">
+          <button class="button flex-1 mr-2">Save</button>
+        </div>
+      </form>
+    </template>
+    <template x-if="!themeChanging">
+      <form x-on:submit.prevent="save()" class="space-y-4">
+        <div class="flex bg-gray-100 p-4 justify-center">
+          Current Theme: <span x-text="currentTheme.label" class="mx-4"></span> <a href="#" @click="viewThemes()" class="w-5 h-5">{% include './_icon.liquid', name: 'edit' %}</a>
+        </div>
+        <template x-for="(item, index, collection) in currentTheme.settings">
           <div>
-            <label class="field-label" x-text="item.label"></label>
-            <select x-model="themeSettings[themeId][item.id]">
-              <template x-for="(item2, index2, collection2) in item.options">
-                <option 
-                  x-bind:value="item2.value" 
-                  x-bind:selected="item2.value === themeSettings[themeId][item.id]"
-                  x-text="item2.label">
-              </template>
-            </select>
+          <template x-if="item.type === 'multi'">
+            <div>
+              <label class="field-label" x-text="item.label"></label>
+              <select x-model="themeSettings[themeId][item.id]">
+                <template x-for="(item2, index2, collection2) in item.options">
+                  <option 
+                    x-bind:value="item2.value" 
+                    x-bind:selected="item2.value === themeSettings[themeId][item.id]"
+                    x-text="item2.label">
+                </template>
+              </select>
+            </div>
+          </template>
           </div>
         </template>
+        <div class="flex items-center justify-between">
+          <button class="button flex-1 mr-2">Save</button>
         </div>
-      </template>
-      <div class="flex items-center justify-between">
-        <button class="button flex-1 mr-2">Save</button>
-      </div>
-    </form>
+      </form>
+    </template>
   </div>
 
 </div>
@@ -83,9 +103,8 @@
       currentTheme: themes.find(theme => theme.id === '{{ site.themeId }}'),
 
       themeChanging: false,
-
-      toggleThemeChange() {
-        this.themeChanging = !this.themeChanging
+      viewThemes() {
+        this.themeChanging = true
       },
 
       save() {
