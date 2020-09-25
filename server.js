@@ -135,7 +135,18 @@ server.get('/settings/:type', requireUser, (req, res) => {
   const themes = [ 
     { 
       id: 'base', 
-      label: 'Base' 
+      label: 'Base',
+      settings: [
+        {
+          type: 'multi', 
+          label: 'Header',
+          id: 'layout',
+          options: [
+            { label: 'Tight', value: 'tight' },
+            { label: 'Loose', value: 'loose' }
+          ]
+        }
+      ]
     }, 
     { 
       id: 'paper', 
@@ -234,10 +245,22 @@ server.put('/api/settings', (req, res) => {
 
 server.put('/api/theme-settings', (req, res) => {
 
+  const [ siteUpdates, siteUpdatesE ] = safe(db.sites.updateThemeSettings, {
+    id: res.locals.siteId,
+    themeSettings: JSON.stringify(req.body.themeSettings)
+  })
+
+  if (siteUpdatesE) 
+    return respond(res, 400, siteUpdatesE.message)
+
+  respond(res, 200)
+})
+
+server.put('/api/theme', (req, res) => {
+
   const [ siteUpdates, siteUpdatesE ] = safe(db.sites.updateTheme, {
     id: res.locals.siteId,
-    themeId: req.body.themeId,
-    themeSettings: JSON.stringify(req.body.themeSettings)
+    themeId: req.body.themeId
   })
 
   if (siteUpdatesE) 

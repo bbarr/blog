@@ -38,9 +38,9 @@
       -->
     </div>
     <template x-if="themeChanging">
-      <form @submit.prevent="apply()" class="space-y-4">
+      <form @submit.prevent="saveTheme()" class="space-y-4">
         <template x-for="(item, index, collection) in themes">
-          <a href="#" class="p-4 flex justify-between no-underline" @click.prevent="preview()" :class="{ 'bg-gray-100': currentTheme.id == item.id }">
+          <a href="#" class="p-4 flex justify-between no-underline" @click.prevent="preview(item.id)" :class="{ 'bg-gray-100': selectedThemeId == item.id }">
             <span x-text="item.label"></span>
           </a>
         </template>
@@ -102,9 +102,30 @@
 
       currentTheme: themes.find(theme => theme.id === '{{ site.themeId }}'),
 
+      selectedThemeId: null,
       themeChanging: false,
       viewThemes() {
         this.themeChanging = true
+        this.selectedThemeId = this.currentTheme.id
+      },
+
+      preview(id) {
+        this.selectedThemeId = id
+      },
+
+      saveTheme() {
+        return fetch('/api/theme', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            themeId: this.selectedThemeId,
+          })
+        }).then(resp => resp.json())
+          .then(json => {
+            window.location.reload()
+          })
       },
 
       save() {
@@ -123,7 +144,6 @@
 
         }).then(resp => resp.json())
           .then(json => {
-            debugger
           })
       }
     }
