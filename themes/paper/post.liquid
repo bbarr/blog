@@ -3,7 +3,7 @@
     <head>
         {% include 'components/_head.liquid' %}
     </head>
-    <body>
+    <body {% if site.themeSettings.paper.mode == 'dark' %}data-theme="dark"{% endif %}>
         <header class="header">
             <div class="header__left">
                 <a class="logo" href="/">

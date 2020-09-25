@@ -49,18 +49,8 @@
 }
   
   .main {
-    display: flex;
-    flex-direction: column;
-    max-width: calc(var(--content-width) * 2);
     margin: 0 auto;
     padding: 1.5vw 15px 0;
-  }
-
-  .sidebar .main {
-    @media screen and (min-width: 1300px) {
-      flex-direction: row;
-    }
-    
   }
   
   .footer {
