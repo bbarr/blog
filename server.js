@@ -138,13 +138,10 @@ server.get('/settings/:type', requireUser, (req, res) => {
       label: 'Base',
       settings: [
         {
-          type: 'multi', 
-          label: 'Header',
-          id: 'layout',
-          options: [
-            { label: 'Tight', value: 'tight' },
-            { label: 'Loose', value: 'loose' }
-          ]
+          type: 'color', 
+          label: 'Accent color',
+          id: 'accent-color',
+          value: ''
         }
       ]
     }, 
@@ -153,18 +150,24 @@ server.get('/settings/:type', requireUser, (req, res) => {
       label: 'Paper',
       settings: [
         {
-          type: 'multi', 
-          label: 'Layout',
-          id: 'layout',
-          options: [
-            { label: 'Top', value: 'top' },
-            { label: 'Side', value: 'side' }
-          ]
+          type: 'color', 
+          label: 'Link color',
+          id: 'accent-color',
+          value: ''
         },
         {
           type: 'multi', 
           label: 'Mode',
           id: 'mode',
+          options: [
+            { label: 'Light', value: 'light' },
+            { label: 'Dark', value: 'dark' }
+          ]
+        },
+        {
+          type: 'boolean', 
+          label: 'Show user dark-mode toggle?',
+          id: 'mode-toggle',
           options: [
             { label: 'Light', value: 'light' },
             { label: 'Dark', value: 'dark' }

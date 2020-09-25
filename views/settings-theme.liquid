@@ -56,6 +56,18 @@
         </div>
         <template x-for="(item, index, collection) in currentTheme.settings">
           <div>
+          <template x-if="item.type === 'color'">
+            <div>
+              <label class="field-label" x-text="item.label"></label>
+              <input type="color" x-model="themeSettings[themeId][item.id]">
+            </div>
+          </template>
+          <template x-if="item.type === 'boolean'">
+            <div class="flex items-center">
+              <input type="checkbox" class="mr-2" x-bind:id="item.id" x-model="themeSettings[themeId][item.id]">
+              <label class="field-label" x-bind:for="item.id" x-text="item.label"></label>
+            </div>
+          </template>
           <template x-if="item.type === 'multi'">
             <div>
               <label class="field-label" x-text="item.label"></label>

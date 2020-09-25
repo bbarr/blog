@@ -6,6 +6,7 @@ body {
   color: #333;
   font-size: 16px;
   line-height: 1.6;
+  --link-color: #1E55AE;
 }
 
 p {
@@ -52,7 +53,7 @@ h4, h5, h6 {
 }
 
 a {
-  color: #1E55AE;
+  color: var(--link-color);
   transition: color 0.1s ease;
 
   &:hover {
