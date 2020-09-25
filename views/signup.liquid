@@ -97,10 +97,8 @@
 
           this.isLoading = true
           const offset = (new Date()).getTimezoneOffset()
-          const hours = offset / 60
-          const minutes = offset % 60
           const op = offset < 0 ? '-' : '+'
-          const timezone = `${op}${hours}:${minutes.toString().padEnd(2, '0')}`
+          const timezone = `${op}${offset}`
           return fetch('/api/create-site', {
             method: 'POST',
             headers: {
