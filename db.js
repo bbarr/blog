@@ -202,14 +202,15 @@ module.exports = {
       if (rawDeploy) {
         const deploy = camelKeys(rawDeploy)
         if (deploy) deleteDeploy.run(deploy.id)
-        const site = selectSiteById.get(deploy.siteId)
-        site && (site.theme_settings = JSON.parse(site.theme_settings))
-        console.log(site.theme_settings)
+        const site = camelKeys(selectSiteById.get(deploy.siteId))
+        site && (site.themeSettings = JSON.parse(site.themeSettings))
+        if (!site.themeSettings[site.themeId])
+          site.themeSettings[site.themeId] = {}
         const post = selectPostById.get(deploy.postId)
         const user = selectUserBySiteId.get(deploy.siteId)
         return [
           deploy,
-          site ? camelKeys(site) : site,
+          site,
           post ? camelKeys(post) : post,
           user ? camelKeys(user) : user
         ]

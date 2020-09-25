@@ -89,6 +89,9 @@
     const themes = JSON.parse('{{ themes | json }}')
 
     const themeSettings = JSON.parse('{{ site.themeSettings }}')
+    const themeId = '{{ site.themeId }}'
+    if (!themeSettings[themeId])
+      themeSettings[themeId] = {}
 
     const api = {
 
@@ -98,7 +101,7 @@
 
       themeSettings,
 
-      themeId: '{{ site.themeId }}',
+      themeId,
 
       currentTheme: themes.find(theme => theme.id === '{{ site.themeId }}'),
 
