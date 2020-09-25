@@ -4,6 +4,14 @@
         {% include 'components/_head.liquid' %}
     </head>
     <body {% if site.themeSettings.paper.mode == 'dark' %}data-theme="dark"{% endif %}>
+      <script>
+        ;(function() {
+          const saved = localStorage.getItem('mode-preference')
+          if (saved) {
+            document.body.setAttribute('data-theme', saved)
+          }
+        })();
+      </script>
         <header class="header">
             <div class="header__left">
               <a class="logo" href="/">
@@ -13,7 +21,6 @@
               </a>
             </div>
             
-            <!--
             <div class="header__right">        
                 <button role="button" aria-label="Toggle dark/light" @click.prevent="toggleTheme" class="toggle-theme">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
@@ -23,6 +30,7 @@
             <script>
               ;(function() {
                 const toggle = document.querySelector('.toggle-theme')
+                const saved = localStorage.getItem('mode-preference')
                 const showCorrectSvg = () => {
                   if (document.body.getAttribute('data-theme') == 'dark') {
                     toggle.children[0].style.display = 'block'
@@ -34,8 +42,10 @@
                 }
                 toggle.addEventListener('click', e => {
                   if (document.body.getAttribute('data-theme') == 'dark') {
-                    document.body.removeAttribute('data-theme')
+                    localStorage.setItem('mode-preference', 'light')
+                    document.body.setAttribute('data-theme', 'light')
                   } else {
+                    localStorage.setItem('mode-preference', 'dark')
                     document.body.setAttribute('data-theme', 'dark')
                   }
                   showCorrectSvg()
@@ -43,7 +53,6 @@
                 showCorrectSvg()
               })()
             </script>
-            -->
           </header>
 
           <main class="main">
@@ -61,7 +70,7 @@
                                 {{ post.content | markdown | strip_html | truncate: 350 }}
                             </p>
                             <div class="post-meta post-card__meta">
-                              {{ post.publishedAt | date: '%b %d, %Y' }} &middot; {{ post.content | size | divided_by: 540 | floor }} min read
+                              {{ post.publishedAt | date: '%b %d, %Y' }} &middot; {{ post.contentSize | divided_by: 540 | floor }} min read
                             </div>
                             <a class="post-card__link" href="/posts/{{ post.publishedTitle | sluggify }}.html">Link</a>
                         </div>

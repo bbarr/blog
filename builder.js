@@ -96,10 +96,10 @@ async function main() {
             ;(tagData[tag] || (tagData[tag] = [])).push({ 
               url: `/posts/${sluggify(post.publishedTitle)}.html`, 
               title: post.title, 
-              publishedTitle: 
-              post.publishedTitle, 
-              date: post.latestPublishedAt, 
-              content: post.content.slice(0, 100) 
+              publishedTitle: post.publishedTitle, 
+              publishedAt: post.publishedAt, 
+              contentSize: post.content.length,
+              content: post.content.slice(0, 350) 
             })
           }
         }
