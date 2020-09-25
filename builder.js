@@ -182,7 +182,7 @@ async function main() {
       const pages = arrayChunksOf(PER_PAGE, taggedPosts)
 
       for (let [ i, posts ] of pages.entries()) {
-        await engine.renderFile('index.liquid', { 
+        await engine.renderFile('tags.liquid', { 
           site, 
           posts,
           user,
