@@ -44,13 +44,15 @@
           <main class="main">
 
             <div class="author">
-              <img alt="" class="author__image" src="{{ user.avatar }}" width="180" height="180" blur="5" />
-                <h1 class="author__site-title">
-                    {{ site.name }}
-                </h1>
-                <p class="author__intro">
-                    {{ site.description }}
-                </p>
+              <div class="author__content">
+                <img alt="" class="author__image" src="{{ user.avatar }}" width="180" height="180" blur="5" />
+                  <h1 class="author__site-title">
+                      {{ site.name }}
+                  </h1>
+                  <p class="author__intro">
+                      {{ site.description }}
+                  </p>
+              </div>
             </div>
 
             <div class="posts">
