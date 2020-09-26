@@ -4,14 +4,6 @@
         {% include 'components/_head.liquid' %}
     </head>
     <body {% if site.themeSettings.paper.mode == 'dark' %}data-theme="dark"{% endif %}>
-      <script>
-        ;(function() {
-          const saved = localStorage.getItem('mode-preference')
-          if (saved) {
-            document.body.setAttribute('data-theme', saved)
-          }
-        })();
-      </script>
         <header class="header">
             <div class="header__left">
               <a class="logo" href="/">
@@ -22,6 +14,26 @@
             </div>
             
             {% if site.themeSettings.paper['mode-toggle'] %}
+              <script>
+                ;(function() {
+
+                  const oldDefault = localStorage.getItem('mode-default')
+                  const newDefault = '{{ site.themeSettings.paper.mode }}'
+
+                  // make sure default is set
+                  localStorage.setItem('mode-default', newDefault)
+
+                  // if default is DIFFERENT, unset user pref
+                  if (oldDefault !== newDefault) {
+                    localStorage.removeItem('mode-preference')
+                  }
+
+                  const user = localStorage.getItem('mode-preference')
+                  if (user) {
+                    document.body.setAttribute('data-theme', user)
+                  }
+                })();
+              </script>
               <div class="header__right">        
                   <button role="button" aria-label="Toggle dark/light" @click.prevent="toggleTheme" class="toggle-theme">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
