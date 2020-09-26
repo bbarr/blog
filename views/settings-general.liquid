@@ -5,19 +5,25 @@
 
 <div class="flex" x-data="state()">
 
-  <sidebar class="h-screen w-56 bg-gray-100 py-6">
-    <div class="px-6">
-      <h1>{{ site.name }}</h1>
-      <h2 class="text-gray-800 text-sm">{{ site.handle }}.{{ env.HOSTNAME }}</h2>
+  <sidebar class="flex flex-col justify-between h-screen w-56 bg-gray-100">
+    <div>
+      <div class="p-6">
+        <h1>{{ site.name }}</h1>
+        <h2 class="text-gray-800 text-sm">{{ site.handle }}.{{ env.HOSTNAME }}</h2>
+      </div>
+      <nav>
+        <p class="uppercase text-gray-600 mt-8 mb-2 text-sm px-6">Content</p>
+        <a class="side-menu-link" href="/dashboard">{% include '_icon.liquid', name: 'page' %}Posts</a>
+      </nav>
+      <nav>
+        <p class="uppercase text-gray-600 mt-6 mb-2 text-sm px-6">Settings</p>
+        <a class="side-menu-link active" href="/settings/general">{% include '_icon.liquid', name: 'cog' %}General</a>
+        <a class="side-menu-link" href="/settings/theme">{% include '_icon.liquid', name: 'palette' %}Theme</a>
+      </nav>
     </div>
-    <p class="uppercase text-gray-600 mt-8 mb-2 text-sm px-6">Content</p>
-    <nav>
-      <a class="side-menu-link" href="/dashboard">{% include '_icon.liquid', name: 'page' %}Posts</a>
-    </nav>
-    <p class="uppercase text-gray-600 mt-6 mb-2 text-sm px-6">Settings</p>
-    <nav>
-      <a class="side-menu-link active" href="/settings/general">{% include '_icon.liquid', name: 'cog' %}General</a>
-      <a class="side-menu-link" href="/settings/theme">{% include '_icon.liquid', name: 'palette' %}Theme</a>
+    <nav class="flex flex-col text-center">
+      <p class="w-full uppercase text-xs text-gray-600 mt-6 mb-2 px-6">Questions | Feedback</p>
+      <a class="w-full py-3 px-6 text-xs text-gray-700 hover:bg-gray-200 hover:text-gray-800 hover:underline" href="mailto:contact@prosaic.blog">contact@prosaic.blog</a>
     </nav>
   </sidebar>
 
