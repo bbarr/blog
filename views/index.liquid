@@ -3,8 +3,8 @@
 {% block content %}
 
   <header class="w-full bg-white px-2 sm:px-4 py-4">
-    <div class="container mx-auto flex justify-between">
-      <a href="/" title="Kutty Home Page" class="flex no-underline pt-16">
+    <div class="container mx-auto flex justify-between items-center py-8">
+      <a href="/" class="flex no-underline">
         <svg class="fill-current h-12 w-12 mr-1" width="54" height="54" viewBox="0 0 54 54" xmlns="http://www.w3.org/2000/svg">
           <title>Logo</title>
             <g id="Application" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -20,57 +20,57 @@
         </svg>
         <span class="text-2xl text-gray-900">Prosaic</span>
       </a>
-      <div class="flex space-x-4">
-        <a href="/login">Login</a>
-        <a href="/signup">Signup</a>
+      <div>
+        <a href="/login" class="px-4 py-2 rounded hover:bg-gray-100">Login</a>
+        <a href="/signup" class="px-4 py-2 rounded border hover:bg-gray-100">Signup</a>
       </div>
     </div>
   </header>
 
   <section class="container mx-auto py-16 px-4">
     <div class="w-full md:w-11/12 xl:w-8/12 mx-auto text-left md:text-center">
-      <p class="mb-2 text-gray-500 uppercase tracking-wide font-bold text-xs">Introducing Prosaic</p>
+      <p class="mb-2 text-gray-600 uppercase tracking-wide font-bold text-xs">Introducing Prosaic</p>
       <h1 class="text-4xl md:text-5xl text-gray-900 leading-tight mb-3 font-bold md:font-extrabold">
         An <span class="highlight">intentionally simple</span> <br />blogging platform
       </h1>
-      <p class="text-lg md:text-2xl text-gray-600 mb-6">
-        Prosaic is an independent publishing platform that combines the ease-of-use of a note-taking app with the power of a static site generator, making it easy for anyone to create a personal weblog.
+      <p class="text-lg md:text-2xl text-gray-600">
+        Prosaic is an independent publishing platform that makes it easy for anyone to create a personal weblog on their own domain. It combines the ease-of-use of a note-taking app with the power of a static site generator.
       </p>
-      <div class="py-8 mb-6">
-        <a href="/signup" class="bg-black rounded text-white font-semibold no-underline py-4 px-6 hover:bg-gray-800 hover:shadow-md focus:outline-none focus:shadow-outline mx-auto">Get started</a>
-        <a href="https://blog.prosaic.blog/" class="py-4 px-6">View our blog</a>
+      <div class="flex flex-col md:flex-row justify-start md:justify-center text-xs uppercase tracking-wide font-bold text-gray-900 space-x-0 md:space-x-8 py-8">
+        <div class="flex items-center">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-black">
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          Clear pricing ($5/mo)
+        </div>
+        <div class="flex items-center">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-black">
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          No branding or ads
+        </div>
+        <div class="flex items-center">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-black">
+            <path
+              fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          Custom domains
+        </div>
       </div>
-      <div class="flex flex-col md:flex-row justify-start md:justify-center text-sm text-gray-600 space-x-0 md:space-x-8 space-y-2 md:space-y-0">
-        <div class="flex items-center">
-          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-green-600">
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Simple pricing ($5/mo)
-        </div>
-        <div class="flex items-center">
-          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-green-600">
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Distraction-free editing
-        </div>
-        <div class="flex items-center">
-          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 text-green-600">
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-          Easy Personalization
-        </div>
+      <div class="pt-8">
+        <a href="/signup" class="bg-black rounded text-white font-semibold no-underline py-4 px-6 hover:bg-gray-800 hover:shadow-md focus:outline-none focus:shadow-outline mx-auto">Get started</a>
+        <a href="https://blog.prosaic.blog/" class="py-4 px-6 ml-2 rounded border font-semibold hover:bg-gray-100">View our blog</a>
       </div>
     </div>
   </section>
@@ -80,39 +80,39 @@
     
       <div class="container mx-auto">
         <div aria-labelledby="tab-cms" id="panel-cms" role="tabpanel" x-show="tab === 'cms'">
-          <img src="/images/p_cms.png">
+          <img src="/images/p_cms.png" alt="">
         </div>
         <div aria-labelledby="tab-editor" id="panel-editor" role="tabpanel" x-show="tab === 'editor'">
-          <img src="/images/p_editor.png">
+          <img src="/images/p_editor.png" alt="">
         </div>
         <div aria-labelledby="tab-blog" id="panel-blog" role="tabpanel" x-show="tab === 'blog'">
-          <img src="/images/p_blog.png">
+          <img src="/images/p_blog.png" alt="">
         </div>
       </div>
 
       <div class="xl:container mx-auto -mt-4 mb-24">
         <ul role="tablist" class="flex flex-col border-t border-b border-r lg:flex-row">
           <li class="lg:w-1/3 border-l border-gray-300 hover:shadow-md" :class="{ 'bg-gray-100': tab === 'cms' }">
-            <a aria-controls="panel-cms"  aria-selected="" id="tab-cms" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'cms'; window.location.hash = 'cms'" href="#">
+            <a aria-controls="panel-cms" id="tab-cms" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'cms'; window.location.hash = 'cms'" href="#">
               <div class="font-bold text-xl text-gray-900 mb-3">Simple Content Management</div>
               <p class="text-gray-700 text-base">
-                Our platform is designed more like a personal note-taking app than a traditional CMS. And you can easily move your content in or out as portable text and image files.
+                Our platform is designed more like a personal note-taking app than a traditional CMS. You own your content and should be able to easily export it at any time.
               </p>
             </a>
           </li>
           <li class="lg:w-1/3 border-l border-gray-300 hover:shadow-md" :class="{ 'bg-gray-100': tab === 'editor' }">
-            <a aria-controls="panel-editor"  aria-selected="" id="tab-editor" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'editor'; window.location.hash = 'editor'" href="#">
+            <a aria-controls="panel-editor" id="tab-editor" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'editor'; window.location.hash = 'editor'" href="#">
               <div class="font-bold text-xl text-gray-900 mb-3">Distraction-free Editing</div>
               <p class="text-gray-700 text-base">
-                Our distraction-free editor is designed to feel more like a professional application than a clunky WYSIWYG. Focus on your content instead of its management.
+                Our <span class="highlight text-black font-bold">distraction-free editor</span> is designed to feel more like a professional application than a clunky WYSIWYG. Focus on your content instead of its management.
               </p>
             </a>
           </li>
           <li class="lg:w-1/3 border-l border-gray-300 hover:shadow-md" :class="{ 'bg-gray-100': tab === 'blog' }">
-            <a aria-controls="panel-blog"  aria-selected="" id="tab-blog" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'blog'; window.location.hash = 'blog'" href="#">
+            <a aria-controls="panel-blog" id="tab-blog" role="tab" class="block p-8 no-underline" @click.prevent="tab = 'blog'; window.location.hash = 'blog'" href="#">
               <div class="font-bold text-xl text-gray-900 mb-3">Easy Personalization</div>
               <p class="text-gray-700 text-base">
-                Whether you're a writer, an artist, or just a hobbyist, we plan to offer a variety of themes that can be tailored to fit your style. It should be easy to create a blog that still feels personal.
+                Whether you're a writer, an artist, or just a hobbyist, we offer <span class="highlight text-black font-bold">a growing variety of themes</span> that can be tailored to fit your style. It should be easy to create a blog that still feels personal.
               </p>
             </a>
           </li>
@@ -123,50 +123,29 @@
   </section>
 
   <section class="container mx-auto py-8 px-4 lg:flex">
-    <div class="max-w-xl mx-auto  ">
-      <h2 class="text-3xl md:text-4xl text-gray-900 leading-tight mb-3 font-bold">Get started in seconds</h2>
-      <p class="text-base md:text-lg text-gray-600 mb-5">
-        While static sites are a fast and reliable way to deliver content on the web, they require a lot of technical knowledge to set up. We want to make the performance, reliability, and security improvements of static content accessible to everyone.
-      </p>
-      <p class="text-base md:text-lg text-gray-600 mb-5">
-        Prosaic leverages the best of static site generators while removing the overhead and complexity of setting one up yourself. You no longer need to be a developer to get the benefits of a custom static site.
-      </p>
-    </div>
     <div class="pl-16">
-      <img src="/images/p_ssg.svg" class="max-w-md">
-    </div>
-  </section>
-
-  <section class="container mx-auto py-8 px-4 lg:flex">
-    <div class="pl-16">
-      <img src="/images/p_blogger.svg" class="max-w-md">
+      <img src="/images/p_blogger.svg" class="max-w-md" alt="">
     </div>
     <div class="max-w-xl mx-auto">
-      <h2 class="text-3xl md:text-4xl text-gray-900 leading-tight mb-3 font-bold">Just focus on your content</h2>
-      <p class="text-base md:text-lg text-gray-600 mb-5">
-        While many simple blogging platforms eventually evolve into overly-flexible or feature-rich CMSs, we are committed to staying focused on the needs of small and independent publishing.
+      <h2 class="text-3xl md:text-4xl text-gray-900 leading-tight mb-3 font-bold mb-8">Just a blogging platform</h2>
+      <p class="text-base md:text-lg text-gray-600 mb-4">
+        While many simple blogging platforms eventually evolve into complex content management systems, we are committed to staying focused on the needs of small and independent publishing.
       </p>
-      <p class="text-base md:text-lg text-gray-600 mb-5">
-        Prosaic allows you to focus on your content instead of its management. Our priorities are removing the overhead of setting up a personal blog and delivering the best writing experience.
+      <p class="text-base md:text-2xl border-l-4 pl-6 text-gray-800 my-6">
+        Prosaic allows you to <span class="highlight font-semibold">focus on your content</span> instead of its management.
       </p>
+      <p class="text-base md:text-lg text-gray-600 mb-4">
+        We're a <a href="https://johnquealy.com/" target="_blank" class="hover:text-black hover:bg-gray-100">designer <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" class="inline-block mb-1"><path fill="none" d="M0 0h24v24H0z"/><path d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z"/></svg></a> + <a href="https://www.brendanbarr.com/" target="_blank" class="hover:text-black hover:bg-gray-100">developer <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" class="inline-block mb-1"><path fill="none" d="M0 0h24v24H0z"/><path d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z"/></svg></a> duo on a mission to make it easier for anyone to create a personal, independent weblog. Our priorities are removing the overhead of getting set up and delivering the best writing experience.
+      </p>
+      <div class="pt-8">
+        <a href="/signup" class="bg-black rounded text-white font-semibold no-underline py-3 px-4 hover:bg-gray-800 hover:shadow-md focus:outline-none focus:shadow-outline mx-auto">Get started</a>
+        <a href="https://blog.prosaic.blog/" class="py-3 px-4 ml-2 rounded border font-semibold hover:bg-gray-100">View our blog</a>
+      </div>
     </div>
   </section>
 
-  <section class="container mx-auto py-8 px-4 lg:flex">
-    <div class="max-w-xl mx-auto">
-      <p class="mb-2 text-gray-500 uppercase tracking-wide font-semibold text-xs">Introducing Prosaic Labs</p>
-      <h2 class="text-3xl md:text-4xl text-gray-900 leading-tight mb-3 font-bold">A platform built with you</h2>
-      <p class="text-base md:text-lg text-gray-600 mb-5">
-        We are a designer + developer duo who share a passion for the open web and a mission to make it easier for anyone to create a personal, independent website. We are starting with the basics and inviting you to join us on the journey of building a platform that stays true to this mission.
-      </p>
-    </div>
-    <div class="pl-16">
-      <img src="/images/p_labs.svg" class="max-w-md">
-    </div>
-  </section>
-
-  <p class="text-gray-500 tracking-wide font-normal text-xs text-center m-12">
-    &#169; 2020 Prosaic Labs <a target="_blank" href="/terms.html">Terms</a> <a target="_blank" href="/privacy.html">Privacy</a> &middot; Illustrations by <a href="https://www.pixeltrue.com/illustrations">Pixel True</a>
+  <p class="text-gray-600 tracking-wide font-normal text-xs text-center m-24">
+    &#169; 2020 Prosaic &middot; <a target="_blank" href="/terms.html" class="hover:text-black hover:bg-gray-100">Terms</a> <a target="_blank" href="/privacy.html" class="hover:text-black hover:bg-gray-100">Privacy</a> &middot; Illustrations by <a href="https://www.pixeltrue.com/illustrations" class="hover:text-black hover:bg-gray-100">Pixel True</a>
   </p>
 
 
