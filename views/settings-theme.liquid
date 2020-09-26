@@ -71,7 +71,7 @@
           <template x-if="item.type === 'multi'">
             <div>
               <label class="field-label" x-text="item.label"></label>
-              <select x-model="themeSettings[themeId][item.id]">
+              <select class="field-select" x-model="themeSettings[themeId][item.id]">
                 <template x-for="(item2, index2, collection2) in item.options">
                   <option 
                     x-bind:value="item2.value" 
