@@ -150,12 +150,6 @@ server.get('/settings/:type', requireUser, (req, res) => {
       label: 'Paper',
       settings: [
         {
-          type: 'color', 
-          label: 'Link color',
-          id: 'link-color',
-          value: ''
-        },
-        {
           type: 'multi', 
           label: 'Mode',
           id: 'mode',
@@ -163,6 +157,18 @@ server.get('/settings/:type', requireUser, (req, res) => {
             { label: 'Light', value: 'light' },
             { label: 'Dark', value: 'dark' }
           ]
+        },
+        {
+          type: 'color', 
+          label: 'Link color (in dark mode)',
+          id: 'link-color-dark',
+          value: ''
+        },
+        {
+          type: 'color', 
+          label: 'Link color (in light mode)',
+          id: 'link-color-light',
+          value: ''
         },
         {
           type: 'boolean', 

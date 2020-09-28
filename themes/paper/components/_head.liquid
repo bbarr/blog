@@ -26,6 +26,9 @@
 
 <style>
   body {
-    --link-color: {{ site.themeSettings.paper['accent-color'] }};
+    --link-color: {{ site.themeSettings.paper['link-color-light'] }};
+  }
+  body[data-theme="dark"] {
+    --link-color: {{ site.themeSettings.paper['link-color-dark'] }};
   }
 </style>
