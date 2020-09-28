@@ -887,11 +887,15 @@ form input {
   border: none !important;
 }
 
+body {
+  --editor-max-width: 800px;
+}
+
 body .CodeMirror {
   margin: auto;
   border-width: 0;
   min-height: 80vh;
-  max-width: 50%;
+  max-width: var(--editor-max-width);
   padding-left: 20px;
   padding-right: 20px;
   margin-left: auto;
@@ -910,7 +914,7 @@ body .CodeMirror pre.CodeMirror-line {
 body .title-wrapper {
   padding-left: 20px;
   padding-right: 20px;
-  width: 50%;
+  max-width: var(--editor-max-width);
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 20px;

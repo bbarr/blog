@@ -149,6 +149,11 @@
           })
       },
 
+      setAlert(title, content, timeout=3000) {
+        this.alert = { title, content, open: true }
+        setTimeout(() => this.alert = { title, content }, timeout)
+      },
+
       save() {
         return fetch('/api/theme-settings', {
           method: 'PUT',
@@ -165,6 +170,7 @@
 
         }).then(resp => resp.json())
           .then(json => {
+            this.setAlert('Theme settings saved')
           })
       }
     }

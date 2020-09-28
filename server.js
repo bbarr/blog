@@ -139,8 +139,8 @@ server.get('/settings/:type', requireUser, (req, res) => {
       settings: [
         {
           type: 'color', 
-          label: 'Accent color',
-          id: 'accent-color',
+          label: 'Link color',
+          id: 'link-color',
           value: ''
         }
       ]
@@ -152,7 +152,7 @@ server.get('/settings/:type', requireUser, (req, res) => {
         {
           type: 'color', 
           label: 'Link color',
-          id: 'accent-color',
+          id: 'link-color',
           value: ''
         },
         {
