@@ -23,6 +23,9 @@
         <div class="field-label">Tags</div>
         <input class="field-input" type="text" x-model="tags">
         <small class="text-sm">Comma-separated list of tags</small>
+        <img class="w-100 h-auto" x-bind:src="featuredImage">
+        <div class="field-label">Featured image</div>
+        <input class="field-input" type="file" x-on:change="uploadFeaturedImage">
       </form>
     </div>
   </div>
@@ -64,19 +67,17 @@
       codeSyntaxHighlighting: true
     },
     async imageUploadFunction(file, onSuccess, onError) {
-      const { data, errors } = await fetch('/api/presigned-upload-url').then(resp => resp.json())
-      if (data) {
-        const [ uploadUrl, hostingUrl ] = data
-        const headers = new Headers({
-          'Content-Type': file.type,
-          'x-amz-acl': 'public-read'
+
+      return new Promise(async (res) => {
+        const canvas = await crop(e.target.files[0], null, {
+          maxWidth: 860
         })
-        return fetch(uploadUrl, {
-          method: 'PUT',
-          headers,
-          body: file
-        }).then(() => onSuccess(hostingUrl))
-      }
+
+        canvas.toBlob(async (blob) => {
+          const url = await uploadImage(blob)
+          res(url)
+        }, 'image/jpeg', 1)
+      })
     }
   })
   const toolbar = document.querySelector('.editor-toolbar')
@@ -120,6 +121,7 @@
       title: `{{ post.title }}`,
       content: `{{ post.content | escapeMarkdown }}`,
       tags: `{{ post.tags }}`,
+      featuredImage: `{{ post.featuredImage }}`,
       {% if post.latestPublishedAt != null %}
       isPublished: true,
       publishButtonText: "Publish changes",
@@ -141,7 +143,7 @@
 
         setInterval(() => {
           if (lastTyped < Date.now() - 1000) {
-            if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content || lastSaved.tags !== this.tags)) {
+            if (!this.isSaving && (lastSaved.title !== this.title || lastSaved.content !== this.content || lastSaved.tags !== this.tags || lastSaved.featuredImage !== this.featuredImage)) {
               this.save()
             }
           }
@@ -149,7 +151,7 @@
       },
       save() {
 
-        const { tags, title, content, id } = api
+        const { featuredImage, tags, title, content, id } = this
         this.isSaving = true
 
         return fetch(`/api/posts/${id === 'new' ? '' : id}`, {
@@ -157,7 +159,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ tags, title, content })
+          body: JSON.stringify({ tags, title, content, featuredImage })
         })
           .then(resp => resp.json().then(body => ([ resp, body ])))
           .then(([ resp, body ]) => {
@@ -172,6 +174,7 @@
             lastSaved.title = title
             lastSaved.tags = tags
             lastSaved.content = content
+            lastSaved.featuredImage = featuredImage
           })
       },
       publish() {
@@ -217,6 +220,34 @@
         this.alert = { title, content, open: true }
         setTimeout(() => this.alert = { title, content }, timeout)
       },
+
+      async uploadFeaturedImage(e) {
+        const canvas = await crop(e.target.files[0], null, {
+          maxWidth: 860
+        })
+        canvas.toBlob(async (blob) => {
+          const url = await uploadImage(blob)
+          //const url = canvas.toDataURL('image/jpeg')
+          this.featuredImage = url
+        }, 'image/jpeg', 1)
+      },
+    }
+
+    async function uploadImage(file) {
+      const { data, errors } = await fetch('/api/presigned-upload-url').then(resp => resp.json())
+      if (data) {
+        const [ uploadUrl, hostingUrl ] = data
+        const headers = new Headers({
+          'Content-Type': file.type,
+          'x-amz-acl': 'public-read'
+        })
+        await fetch(uploadUrl, {
+          method: 'PUT',
+          headers,
+          body: file
+        })
+        return hostingUrl
+      }
     }
 
     mde.codemirror.on('change', () => {
@@ -236,6 +267,84 @@
       title: api.title,
       content: api.content,
       tags: api.tags,
+      featuredImage: api.featuredImage
+    }
+
+    function crop(file, _aspectRatio, opts={}) {
+      const { maxWidth, maxHeight, validations } = opts
+      let aspectRatio;
+
+      // we return a Promise that gets resolved with our canvas element
+      return new Promise(resolve => {
+
+        const fr = new FileReader
+        fr.readAsDataURL(file)
+
+        fr.onload = () => {
+
+          // this image will hold our source image data
+          const inputImage = new Image();
+
+          // we want to wait for our image to load
+          inputImage.onload = () => {
+
+            if (validations) {
+              for (let validate of validations) {
+                const error = validate(inputImage)
+                if (error) {
+                  return alert(error)
+                }
+              }
+            }
+
+            // let's store the width and height of our image
+            const inputWidth = inputImage.naturalWidth
+            const inputHeight = inputImage.naturalHeight
+
+            // get the aspect ratio of the input image
+            const inputImageAspectRatio = inputWidth / inputHeight;
+            aspectRatio = _aspectRatio || inputImageAspectRatio
+
+            // if it's bigger than our target aspect ratio
+            let outputWidth = inputWidth;
+            let outputHeight = inputHeight;
+            if (inputImageAspectRatio > aspectRatio) {
+              outputWidth = inputHeight * aspectRatio;
+            } else if (inputImageAspectRatio < aspectRatio) {
+              outputHeight = inputWidth / aspectRatio;
+            }
+
+            // calculate the position to draw the image at
+            const outputX = (outputWidth - inputWidth) * .5;
+            const outputY = (outputHeight - inputHeight) * .5;
+
+            // create a canvas that will present the output image
+            const outputImage = document.createElement('canvas');
+
+            // set it to the same size as the image
+            outputImage.width = outputWidth;
+            outputImage.height = outputHeight;
+
+            // draw our image at position 0, 0 on the canvas
+            const ctx = outputImage.getContext('2d');
+            ctx.drawImage(inputImage, outputX, outputY);
+            resolve(outputImage);
+          };
+
+          // start loading our image
+          inputImage.src = fr.result
+        }
+      }).then(_canvas => {
+        if (maxWidth) {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          canvas.width = maxWidth
+          canvas.height = maxHeight || (maxWidth / aspectRatio)
+          ctx.drawImage(_canvas, 0, 0, _canvas.width, _canvas.height, 0, 0, canvas.width, canvas.height)
+          return canvas
+        }
+        return _canvas
+      })
     }
 
     window.api = api

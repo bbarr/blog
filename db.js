@@ -65,12 +65,12 @@ const validateHandle = db.prepare('select 1 from site where handle=?')
 const validateDomain = db.prepare('select 1 from site where custom_domain=?')
 
 // post
-const selectPostsBySiteId = db.prepare('select id, content, title, tags, published_title, created_at, updated_at, published_at, latest_published_at from post where site_id=?')
+const selectPostsBySiteId = db.prepare('select id, content, title, tags, featured_image, published_title, created_at, updated_at, published_at, latest_published_at from post where site_id=?')
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
-const selectPostByIdLite = db.prepare('select title, tags, published_title, published_at, latest_published_at from post where id=?')
+const selectPostByIdLite = db.prepare('select title, tags, featured_image, published_title, published_at, latest_published_at from post where id=?')
 const selectPostPage = db.prepare(`
-  select p.title, tags, p.published_title, p.published_at, p.content, u.avatar as user_avatar, u.name as user_name
+  select p.title, p.tags, p.featured_image, p.published_title, p.published_at, p.content, u.avatar as user_avatar, u.name as user_name
     from post p, user u
    where 
          p.site_id=@site_id 
@@ -89,12 +89,12 @@ const selectPostPage = db.prepare(`
 order by p.id asc 
    limit @limit
 `)
-const updatePost = db.prepare('update post set updated_at=current_timestamp, tags=@tags, title=@title, content=@content where id=@id and user_id=@user_id')
+const updatePost = db.prepare('update post set updated_at=current_timestamp, featured_image=@featured_image, tags=@tags, title=@title, content=@content where id=@id and user_id=@user_id')
 const updatePostPublishedTitle = db.prepare('update post set published_title=@title where id=@id')
 const updatePostToPublished = db.prepare('update post set published_at=current_timestamp, latest_published_at=current_timestamp where id=?')
 const updatePostToPublishedAgain = db.prepare('update post set latest_published_at=current_timestamp where id=?')
 const updatePostToUnpublished = db.prepare('update post set published_at=null, latest_published_at=null where id=?')
-const insertPost = db.prepare('insert into post (title, tags, content, user_id, site_id) values (@title, @tags, @content, @user_id, @site_id)')
+const insertPost = db.prepare('insert into post (title, tags, featured_image, content, user_id, site_id) values (@title, @tags, @featured_image, @content, @user_id, @site_id)')
 const deletePostById = db.prepare('delete from post where id=@id and user_id=@user_id')
 
 // permissions
