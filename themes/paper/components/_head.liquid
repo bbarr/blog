@@ -9,6 +9,9 @@
     <meta name="og:type" content="article">
     <meta name="og:title" content="{{ post.title }}">
     <meta name="og:url" content="https://{{ site.handle }}.{{ env.HOSTNAME }}/posts/{{ post.publishedTitle | sluggify }}.html">
+    {% if post.featuredImage %}
+      <meta name="og:image" content="{{ post.featuredImage }}">
+    {% endif %}
 {% else %}
     <meta name="og:type" content="website">
     <meta name="og:title" content="{{ site.name }}">
