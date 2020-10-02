@@ -467,7 +467,7 @@ server.post('/api/create-site', async (req, res) => {
   const [ site, siteE ] = safe(db.sites.create, { 
     billingCustomerId: '',
     billingSubscriptionId: '',
-    themeId: 'base',
+    themeId: 'paper',
     billingPeriodEnd: unixTimestamp(),
     permissions: permissions.forOwner(),
     name,
