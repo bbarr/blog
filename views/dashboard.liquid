@@ -80,7 +80,7 @@
       <button x-on:click="isMenuOpen ? isMenuOpen = false : isMenuOpen = true" class="btn btn-icon"><span class="h-6 w-6 block m-auto">{% include '_icon.liquid', name: 'snowman' %}</span></button>
     </div>
     <div class="py-5 px-10" style="height: calc(100vh - 4rem); overflow-y: auto;">
-      <div class="editor-preview max-w-3xl" x-html="preview"></div>
+      <div class="editor-preview max-w-3xl mx-auto" x-html="preview"></div>
     </div>
   </div>
 
@@ -98,7 +98,23 @@
 <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-<link rel="stylesheet" href="/preview-css/{{ site.themeId | default: 'base' }}.css">
+<link rel="stylesheet" href="/preview.css">
+<script>
+  const Preview = {
+    renderDate(post) {
+      const stamp = post.latestPublishedAt
+      if (!stamp)
+        return `Not published`
+      const date = new Date(stamp)
+      const month = date.getMonth()
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      return `${months[month]} ${date.getDate()}, ${date.getFullYear()}`
+    },
+    renderReadingTime(post) {
+      return `${Math.floor(post.content.length / 540)} min read`
+    }
+  }
+</script>
 <script>
   function state() {
 
@@ -136,7 +152,16 @@
       async selectPost(id) {
         this.selectedId = id
         const post = await fetch(`/api/posts/${id}`).then(resp => resp.json()).then(json => json.data)
-        this.preview = EasyMDE.prototype.markdown.call({ options: { renderingConfig: { codeSyntaxHighlighting: true } } }, post.content)
+        const content = EasyMDE.prototype.markdown.call({ options: { renderingConfig: { codeSyntaxHighlighting: true } } }, post.content)
+        const title = post.title
+        this.preview = `
+          <div class="title">${title}</div>
+          <div class="meta">
+            <span>${Preview.renderDate(post)}</span>
+            <span>${Preview.renderReadingTime(post)}</span>
+          </div>
+          <div class="content">${content}</div>
+        `
         this.selectedPost = post
         const index = this.posts.findIndex(p => p.id == post.id)
         this.posts[index] = post

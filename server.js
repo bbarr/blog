@@ -282,25 +282,6 @@ server.put('/api/theme', (req, res) => {
   respond(res, 200)
 })
 
-const previews = {}
-
-server.get('/preview-css/:themeId.css', async (req, res) => {
-  const { themeId } = req.params
-  console.log(themeId, previews)
-  if (!previews[themeId])
-    previews[themeId] = await new Promise(async (resolve) => {
-      const themeDir = `${process.env.THEMES_DIR}/${themeId}`
-      const raw = await readP(`${themeDir}/style.scss`, 'utf8')
-      sass.render({ data: `.editor-preview { ${raw} }`, includePaths: [ 'node_modules/', themeDir ] }, (e, rendered) => {
-        console.log(e, rendered)
-        resolve(rendered.css.toString())
-      })
-    })
-
-  res.set('Content-type', 'text/css')
-  res.status(200).send(previews[themeId])
-})
-
 server.get('/api/posts/:id', (req, res) => {
   respond(res, 200, db.posts.byId(req.params.id))
 })

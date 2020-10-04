@@ -1,0 +1,64 @@
+
+.editor-preview .title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-top: 40px;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.editor-preview .meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto 30px;
+}
+
+.editor-preview .meta span:last-child:before {
+  content: '\00b7';
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.editor-preview .content {
+  font-family: serif;
+}
+
+.editor-preview p, 
+.editor-preview h1, 
+.editor-preview h2, 
+.editor-preview h3, 
+.editor-preview h4, 
+.editor-preview h5, 
+.editor-preview h6 {
+  margin-bottom: 1rem;
+}
+
+.editor-preview h1, 
+.editor-preview h2, 
+.editor-preview h3, 
+.editor-preview h4, 
+.editor-preview h5, 
+.editor-preview h6 {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.editor-preview h1 {
+  font-size: 2.4rem;
+}
+.editor-preview h2 {
+  font-size: 2.2rem;
+}
+.editor-preview h3 {
+  font-size: 1.8rem;
+}
+.editor-preview h4 {
+  font-size: 1.6rem;
+}
+.editor-preview h5 {
+  font-size: 1.4rem;
+}
+.editor-preview h6 {
+  font-size: 1.2rem;
+}
