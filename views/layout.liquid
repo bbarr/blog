@@ -27,7 +27,9 @@
     //# sourceMappingURL=/sm/bda9d1827a9cd40e32db620f0ce3aa947d27947e3e81dbd119415b83a1bac811.map
   </script>
   <!-- Fathom - beautiful, simple website analytics -->
-  <script src="https://cdn.usefathom.com/script.js" site="YTTPXCVR" defer></script>
+  {% if isProduction %}
+    <script src="https://cdn.usefathom.com/script.js" site="YTTPXCVR" defer></script>
+  {% endif %}
   <!-- / Fathom -->
 </body>
 </html>

@@ -21,7 +21,11 @@ const jwtSignP = util.promisify(jwt.sign)
 const jwtVerifyP = util.promisify(jwt.verify)
 const readP = util.promisify(fs.readFile)
 const server = express()
-const liquid = new Liquid();
+const liquid = new Liquid({
+  globals: {
+    isProduction: process.env.NODE_ENV === 'production'
+  }
+});
 
 AWS.config.update({ 
   endpoint: process.env.SPACES_ENDPOINT,
