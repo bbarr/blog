@@ -67,7 +67,7 @@
 
             <div class="author">
               <div class="author__content">
-                <img alt="" class="author__image" src="{{ user.avatar }}" width="180" height="180" blur="5" />
+                {% if user.avatar %}<img alt="" class="author__image" src="{{ user.avatar }}" width="180" height="180" blur="5" />{% endif %}
                   <h1 class="author__site-title">
                       {{ site.name }}
                   </h1>
@@ -78,6 +78,11 @@
             </div>
 
             <div class="posts">
+              {% if posts.size == 0 %}
+                    <div class="my-10 text-center">
+                      No posts yet. If you are the author, <a href="{{ env.DOMAIN }}/dashboard">go create one</a>
+                    </div>
+              {% endif %}
                 {% for post in posts %}
                     <div class="post-card content-box">
                       {% if post.featuredImage %}

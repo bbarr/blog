@@ -87,8 +87,8 @@
 
   <div class="snowman-menu" style="display: none" x-show="isMenuOpen" x-on:click.away="isMenuOpen = false">
     <a :href="'/editor/' + (selectedPost && selectedPost.id)">Edit</a>
-    <a x-show="selectedPost && selectedPost.latestPublishedAt && selectedPost.latestPublishedAt < selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish changes</a>
-    <a x-show="selectedPost && !selectedPost.latestPublishedAt && selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish</a>
+    {% unless cannotPublish %}<a x-show="selectedPost && selectedPost.latestPublishedAt && selectedPost.latestPublishedAt < selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish changes</a>{% endunless %}
+    {% unless cannotPublish %}<a x-show="selectedPost && !selectedPost.latestPublishedAt && selectedPost.updatedAt" href="#" x-on:click.prevent="publish()">Publish</a>{% endunless %}
     <a x-show="selectedPost && selectedPost.latestPublishedAt" href="#" x-on:click.prevent="unpublish()">Unpublish</a>
     <a href="#" x-on:click.prevent="_delete()">Delete</a>
   </div>

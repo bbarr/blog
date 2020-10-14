@@ -47,9 +47,9 @@ const selectDefaultSiteByUserId = db.prepare(`
   `)
 const insertSite = db.prepare(`
   insert into site
-    (name, handle, billing_customer_id, billing_period_end) 
+    (name, handle, billing_customer_id, billing_period_end, theme_id) 
   values 
-    (@name, @handle, @billing_customer_id, @billing_period_end)
+    (@name, @handle, @billing_customer_id, @billing_period_end, @theme_id)
 `)
 const updateSiteBilling = db.prepare(`
   update site 
@@ -69,6 +69,7 @@ const selectPostsBySiteId = db.prepare('select id, content, title, tags, feature
 const selectPostContentById = db.prepare('select content from post where id=?')
 const selectPostById = db.prepare('select * from post where id=?')
 const selectPostByIdLite = db.prepare('select title, tags, featured_image, published_title, published_at, latest_published_at from post where id=?')
+const selectHasPublishedPosts = db.prepare('select id from post where published_at is not null and user_id = ?')
 const selectPostPage = db.prepare(`
   select p.title, p.tags, p.featured_image, p.published_title, p.published_at, p.content, u.avatar as user_avatar, u.name as user_name
     from post p, user u
@@ -133,6 +134,7 @@ module.exports = {
     create: db.transaction(props => {
       const info = insertSite.run(snakeKeys(props))
       insertPermissions.run(snakeKeys({ userId: props.userId, siteId: info.lastInsertRowid, list: props.permissions }))
+      insertDeploy.run(snakeKeys({ siteId: info.lastInsertRowid }))
       return selectSiteById.get(info.lastInsertRowid)
     }),
     updateBilling(props) {
@@ -165,6 +167,7 @@ module.exports = {
     bySiteId: siteId => selectPostsBySiteId.all(siteId).map(camelKeys),
     byId: id => camelKeys(selectPostById.get(id)),
     byIdLite: id => camelKeys(selectPostByIdLite.get(id)),
+    hasPublishedPosts: userId => selectHasPublishedPosts.get(userId),
     getPage: props => {
 
       // add one

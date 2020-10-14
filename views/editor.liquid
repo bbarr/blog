@@ -56,7 +56,14 @@
 <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
 <script src="/easymde.min.js"></script>
+{% if cannotPublish %}
+  <script src="https://js.stripe.com/v3/"></script>
+{% endif %}
 <script>
+
+  {% if cannotPublish %}
+    const stripe = Stripe('{{ env.STRIPE_KEY }}');
+  {% endif %}
 
   const mde = new EasyMDE({ 
     uploadImage: true, 
@@ -122,7 +129,10 @@
       content: `{{ post.content | escapeMarkdown }}`,
       tags: `{{ post.tags }}`,
       featuredImage: `{{ post.featuredImage }}`,
-      {% if post.latestPublishedAt != null %}
+      {% if cannotPublish %}
+      isPublished: false,
+      publishButtonText: "Setup billing to publish",
+      {% elsif post.latestPublishedAt != null %}
       isPublished: true,
       publishButtonText: "Publish changes",
       {% else  %}
@@ -178,15 +188,29 @@
           })
       },
       publish() {
-        fetch(`/api/posts/${this.id}/publish`, {
-          method: 'POST'
-        }).then(async () => {
-          this.post = await fetch(`/api/posts/${this.id}`).then(resp => resp.json()).then(json => json.data)
-          this.publishButtonText = 'Publish changes'
-          this.hasChanges = false
-          this.isPublished = true
-          this.setAlert('Post published!')
-        })
+        {% if cannotPublish %}
+          return fetch('/api/create-billing-session')
+            .then(resp => resp.json())
+            .then(({ data: session, error }) => {
+              stripe.redirectToCheckout({
+                sessionId: session.id,
+              }).then(result => {
+                if (result.error) {
+                  console.log(result.error.message)
+                }
+              })
+            })
+        {% else %}
+          fetch(`/api/posts/${this.id}/publish`, {
+            method: 'POST'
+          }).then(async () => {
+            this.post = await fetch(`/api/posts/${this.id}`).then(resp => resp.json()).then(json => json.data)
+            this.publishButtonText = 'Publish changes'
+            this.hasChanges = false
+            this.isPublished = true
+            this.setAlert('Post published!')
+          })
+        {% endif %}
       },
       unpublish() {
         if (confirm('Are you sure you want to unpublish this post?')) {
