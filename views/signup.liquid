@@ -70,11 +70,11 @@
 
     function state() {
       return {
-        screen: {% if isUser %}'create-site'{% else %}'create-user'{% endif %},
-        id: {% if user %}'{{ user.id }}'{% else %}''{% endif %},
-        email: {% if user %}'{{ user.email }}'{% else %}''{% endif %},
+        screen: 'create-user',
+        id: '',
+        email: '',
         password: '',
-        name: {% if user %}'{{ user.name }}'{% else %}''{% endif %},
+        name: '',
         siteName: '',
         handle: '',
         isLoading: false,

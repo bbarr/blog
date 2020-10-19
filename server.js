@@ -244,10 +244,7 @@ server.get('/login', (req, res) => {
 
 server.get('/signup', (req, res) => {
   console.log('signup is user', !!res.locals.userId)
-  res.render('signup.liquid', {
-    isUser: !!res.locals.userId,
-    user: res.locals.userId &&  db.users.byId(res.locals.userId)
-  })
+  res.render('signup.liquid')
 })
 
 server.get('/editor/new', (req, res) => {
